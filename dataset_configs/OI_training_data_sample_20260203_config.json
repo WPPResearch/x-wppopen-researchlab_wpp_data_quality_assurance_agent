@@ -1,0 +1,9 @@
+{
+  "datasets": [
+    {
+      "type": "bigquery",
+      "name": "synthetic_data",
+      "description": "This dataset was anonymized and created based on the dataset: OI_training_data_sample_20260203. "
+    }
+  ]
+}

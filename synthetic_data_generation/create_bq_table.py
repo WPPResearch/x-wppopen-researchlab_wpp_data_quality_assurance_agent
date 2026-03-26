@@ -1,0 +1,182 @@
+# Copyright 2025 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+
+import os
+from pathlib import Path
+
+from dotenv import load_dotenv
+from google.cloud import bigquery
+
+# Define the path to the .env file
+env_file_path = Path(__file__).parent.parent / ".env"
+print(env_file_path)
+
+# Load environment variables from the specified .env file
+load_dotenv(dotenv_path=env_file_path)
+
+
+def load_csv_to_bigquery(data_project_id, dataset_name, table_name, csv_filepath):
+    """Loads a CSV file into a BigQuery table.
+
+    Args:
+        data_project_id: GCP Project for BQ data.
+        dataset_name: The name of the BigQuery dataset.
+        table_name: The name of the BigQuery table.
+        csv_filepath: The path to the CSV file.
+    """
+
+    client = bigquery.Client(project=data_project_id)
+
+    dataset_ref = client.dataset(dataset_name)
+    table_ref = dataset_ref.table(table_name)
+
+    job_config = bigquery.LoadJobConfig(
+        source_format=bigquery.SourceFormat.CSV,
+        skip_leading_rows=1,  # Skip the header row
+        autodetect=True,  # Automatically detect the schema
+    )
+
+    with open(csv_filepath, "rb") as source_file:
+        job = client.load_table_from_file(source_file, table_ref, job_config=job_config)
+
+    job.result()  # Wait for the job to complete
+
+    print(f"Loaded {job.output_rows} rows into {dataset_name}.{table_name}")
+
+
+def create_dataset_if_not_exists(compute_project_id, data_project_id, dataset_name):
+    """Creates a BigQuery dataset if it does not already exist.
+
+    Args:
+        compute_project_id: GCP Project for BQ compute.
+        data_project_id: GQP Project for BQ data.
+        dataset_name: The name of the BigQuery dataset.
+    """
+    client = bigquery.Client(project=compute_project_id)
+    dataset_full_name = f"{data_project_id}.{dataset_name}"
+
+    try:
+        client.get_dataset(dataset_full_name)  # Make an API request.
+        print(f"Dataset {dataset_full_name} already exists")
+    except Exception:
+        dataset = bigquery.Dataset(dataset_full_name)
+        dataset.location = "US"  # Set the location (e.g., "US", "EU")
+        dataset = client.create_dataset(dataset, timeout=30)  # Make an API request.
+        print(f"Created dataset {dataset_full_name}")
+
+
+def sanitize_table_name(filename):
+    """Sanitizes a filename into a BigQuery-compatible table name."""
+    # Use the name after the '/' and remove .csv
+    name = filename.replace(".csv", "")
+    # BigQuery table names: letters, numbers, underscores only
+    # Replacing - and . with _ to ensure it's a valid BQ name
+    sanitized = name.replace("-", "_").replace(".", "_")
+    return sanitized
+
+
+def main():
+    current_directory = os.getcwd()
+    print(f"Current working directory: {current_directory}")
+
+    """Main function to load CSV files into BigQuery."""
+    data_project_id = os.getenv("BQ_DATA_PROJECT_ID")
+    compute_project_id = os.getenv("BQ_COMPUTE_PROJECT_ID")
+    if not data_project_id:
+        raise ValueError("BQ_DATA_PROJECT_ID environment variable not set.")
+    if not compute_project_id:
+        raise ValueError("BQ_COMPUTE_PROJECT_ID environment variable not set.")
+
+    # dataset_name = "forecasting_sticker_sales"
+    # train_csv_filepath = "data_science/utils/data/train.csv"
+    # test_csv_filepath = "data_science/utils/data/test.csv"
+
+    # # Create the dataset if it doesn't exist
+    # print("Creating dataset.")
+    # create_dataset_if_not_exists(compute_project_id, data_project_id, dataset_name)
+
+    # # Load the train data
+    # print("Loading train table.")
+    # load_csv_to_bigquery(data_project_id, dataset_name, "train", train_csv_filepath)
+
+    # # Load the test data
+    # print("Loading test table.")
+    # load_csv_to_bigquery(data_project_id, dataset_name, "test", test_csv_filepath)
+
+    ## Changes the lines below to load any other csv file you want to BigQuery
+    # 1) Specify the dataset name or change it to create a new one
+    # 2) Specify the csv file path
+    # 3) call create_dataset_if_not_exists function to create the dataset if it doesn't exist
+    # 4) call load_csv_to_bigquery function to load the csv file to a BigQuery table and give the table a name
+
+    # Step 1: Specify the dataset name
+    dataset_name = "synthetic_data"
+
+    # # Step 2: Specify the csv file path
+    # synthetic_csv_filepath = "/Users/thanos/Desktop/Satalia-projects/Bitbucket/data_science_agent_adk/data_science/utils/data/test_mixed_errors_batches/OI_training_data_sample_20260203_anonymized_batch_1_missing_5_percent_duplicate_5_percent_outlier_5_percent_categorical_error_5_percent_logical_error_5_percent.csv"
+
+    # Step 3: Create the dataset if it doesn't exist
+    print("Creating dataset.")
+    create_dataset_if_not_exists(compute_project_id, data_project_id, dataset_name)
+
+    # Base path for data
+    base_data_path = "/Users/thanos.lyras/Desktop/Satalia-projects/Bitbucket/data_science_agent_adk/data_science/utils/data"
+
+    # Step 3: Explicitly listed files to upload
+    files_to_upload = [
+        # "OI_training_data_sample_20260203_anonymized_categorical_errors_injected/cat_5_pt.csv",
+        # "OI_training_data_sample_20260203_anonymized_dropped_columns_injected/drop_5_pt.csv",
+        # "OI_training_data_sample_20260203_anonymized_duplicates_injected/dup_5_pt.csv",
+        "OI_training_data_sample_20260203_anonymized_logical_error_1_injected/log_1_5_pt.csv",
+        "OI_training_data_sample_20260203_anonymized_logical_error_1_injected/log_1_10_pt.csv",
+        "OI_training_data_sample_20260203_anonymized_logical_error_1_injected/log_1_20_pt.csv",
+        "OI_training_data_sample_20260203_anonymized_logical_error_1_injected/log_1_40_pt.csv",
+        # "OI_training_data_sample_20260203_anonymized_logical_error_2_injected/log_2_5_pt.csv",
+        # "OI_training_data_sample_20260203_anonymized_logical_error_3_injected/log_3_5_pt.csv",
+        # "OI_training_data_sample_20260203_anonymized_logical_error_4_injected/log_4_5_pt.csv",
+        # "OI_training_data_sample_20260203_anonymized_logical_error_5_injected/log_5_5_pt.csv",
+        # "OI_training_data_sample_20260203_anonymized_logical_error_6_injected/log_6_5_pt.csv",
+        # "OI_training_data_sample_20260203_anonymized_logical_error_7_injected/log_7_5_pt.csv",
+        # "OI_training_data_sample_20260203_anonymized_missing_values_injected/miss_5_pt.csv",
+        # "OI_training_data_sample_20260203_anonymized_outlier_errors_injected/out_5_pt.csv",
+        #     # Mixed Errors (Stacked)
+        #     "mixed_11_errors_stacked/log_1_5_pt.csv",
+        #     "mixed_11_errors_stacked/log_1_5_pt_log_2_5_pt.csv",
+        #     "mixed_11_errors_stacked/log_1_5_pt_log_2_5_pt_log_3_5_pt.csv",
+        #     "mixed_11_errors_stacked/log_1_5_pt_log_2_5_pt_log_3_5_pt_log_4_5_pt.csv",
+        #     "mixed_11_errors_stacked/log_1_5_pt_log_2_5_pt_log_3_5_pt_log_4_5_pt_log_5_5_pt.csv",
+        #     "mixed_11_errors_stacked/log_1_5_pt_log_2_5_pt_log_3_5_pt_log_4_5_pt_log_5_5_pt_log_6_5_pt.csv",
+        #     "mixed_11_errors_stacked/log_1_5_pt_log_2_5_pt_log_3_5_pt_log_4_5_pt_log_5_5_pt_log_6_5_pt_log_7_5_pt.csv",
+        #     "mixed_11_errors_stacked/log_1_5_pt_log_2_5_pt_log_3_5_pt_log_4_5_pt_log_5_5_pt_log_6_5_pt_log_7_5_pt_miss_5_pt.csv",
+        #     "mixed_11_errors_stacked/log_1_5_pt_log_2_5_pt_log_3_5_pt_log_4_5_pt_log_5_5_pt_log_6_5_pt_log_7_5_pt_miss_5_pt_out_5_pt.csv",
+        #     "mixed_11_errors_stacked/log_1_5_pt_log_2_5_pt_log_3_5_pt_log_4_5_pt_log_5_5_pt_log_6_5_pt_log_7_5_pt_miss_5_pt_out_5_pt_dup_5_pt.csv",
+        #     "mixed_11_errors_stacked/log_1_5_pt_log_2_5_pt_log_3_5_pt_log_4_5_pt_log_5_5_pt_log_6_5_pt_log_7_5_pt_miss_5_pt_out_5_pt_dup_5_pt_cat_5_pt.csv",
+    ]
+
+    # Step 4: Load each file into BigQuery
+    for relative_file_path in files_to_upload:
+        full_path = os.path.join(base_data_path, relative_file_path)
+        filename = os.path.basename(relative_file_path)
+        table_name = sanitize_table_name(filename)
+
+        print(f"\nProcessing {filename} -> Table: {table_name}")
+        try:
+            load_csv_to_bigquery(data_project_id, dataset_name, table_name, full_path)
+        except Exception as e:
+            print(f"Failed to upload {filename}: {e}")
+
+
+if __name__ == "__main__":
+    main()

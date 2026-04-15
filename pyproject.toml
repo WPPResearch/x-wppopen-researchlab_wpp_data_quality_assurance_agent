@@ -32,7 +32,7 @@ dependencies = [
     "fpdf2>=2.8.5",
     "markdown2>=2.5.4",
     "a2a-sdk>=0.2.7",
-    "python-multipart>=0.0.22",
+    "python-multipart>=0.0.26",
     "nltk>=3.9.2",
     "asyncpg>=0.31.0",
 ]

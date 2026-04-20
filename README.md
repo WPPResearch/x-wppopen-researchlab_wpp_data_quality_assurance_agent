@@ -1,5 +1,7 @@
 # Data Quality Assurance Agent
 
+> **Note:** This repository has been migrated to WPPOpen to be open sourced. All future fixes and improvements will be done on the [WPPOpen repository](https://github.com/WPPOpen/x-wppopen-researchlab_wpp_data_quality_assurance_agent).
+
 ## Table of Contents
 
 - [Executive Summary](#executive-summary)
@@ -29,6 +31,7 @@
 - [Optimizing and Adjustment Tips](#optimizing-and-adjustment-tips)
 - [Troubleshooting](#troubleshooting)
 - [Deployment on Google Cloud Run](#deployment-on-google-cloud-run)
+
 - [Agent-to-Agent (A2A) API Interface](#agent-to-agent-a2a-api-interface)
 - [Disclaimer](#disclaimer)
 
@@ -167,6 +170,9 @@ set up the data sources to be used with the agent.
     # Optional: GCS bucket for persistent artifact storage (images, PDFs, reports)
     ARTIFACT_BUCKET_NAME=''
     ```
+
+    *NOTE: Ensure that the identity you are using to run the agent has the appropriate Google Cloud IAM permissions granted on your project. At a minimum, you will need roles such as `Vertex AI User`, `BigQuery Data Editor`, and `BigQuery Job User` for the core features to work.*
+
 <a id="authenticate-the-google-cloud-cli"></a>
 1.  **Authenticate the Google Cloud CLI:**
     - A Google Cloud project with billing enabled.
@@ -187,26 +193,19 @@ set up the data sources to be used with the agent.
        aiplatform.googleapis.com
     ```
 
-1.  **BQML Setup:**
+1.  **BQML Setup (Optional):**
 
-    The BQML Agent uses the Vertex AI RAG Engine to query the full BigQuery ML
-    Reference Guide.
+    The BQML Agent can use the Vertex AI RAG Engine to query the full BigQuery ML Reference Guide for syntax help. **This step is entirely optional.** If you skip it, the agent will rely on its pre-trained knowledge to write SQL queries.
 
-    Before running the setup, ensure your project ID is added in .env file:
-    `"GOOGLE_CLOUD_PROJECT"`. Leave the corpus name empty in the .env file:
-    `BQML_RAG_CORPUS_NAME = ''`. The corpus name will be added automatically
-    once it's created.
+    If you choose to enable this feature, ensure your project ID is added in the `.env` file under `"GOOGLE_CLOUD_PROJECT"`. Leave the corpus name empty: `BQML_RAG_CORPUS_NAME = ''`. The corpus name will be added automatically once created.
 
-    To set up the RAG Corpus for your project, run the methods
-    `create_RAG_corpus()` and `ingest_files()` in
-    `data-science/data_science/utils/reference_guide_RAG.py` by running the
-    below command from the working directory:
+    To set up the RAG Corpus for your project, run the following command from the working directory:
 
     ```bash
     python3 data_science/utils/reference_guide_RAG.py
     ```
 
-    NOTE: The default documents that the RAG has been ingested with are [here](https://console.cloud.google.com/storage/browser/cloud-samples-data/adk-samples/data-science/bqml?authuser=1&pageState=(%22StorageObjectListTable%22:(%22f%22:%22%255B%255D%22))).
+    *NOTE: The default documents that the RAG engine ingests are located [here](https://console.cloud.google.com/storage/browser/cloud-samples-data/adk-samples/data-science/bqml?authuser=1&pageState=(%22StorageObjectListTable%22:(%22f%22:%22%255B%255D%22))).*
 
 
 1.  **Code Interpreter Setup:**
@@ -229,6 +228,15 @@ set up the data sources to be used with the agent.
     querying Gemini directly, or [CHASE-SQL](https://arxiv.org/abs/2410.01943).
     Set the variable `NL2SQL_METHOD` to either `BASELINE` (to use Gemini) or
     `CHASE` to use CHASE-SQL.
+
+1.  **Run the agent:**
+
+    Run agent with ADK Web UI:
+    ```bash
+    uv run adk web
+    ```
+
+    For more information on running the agent, such as via the CLI, please see the [Running the Agent](#running-the-agent) section below.
 
 ## Database Setup
 
@@ -308,9 +316,7 @@ agent to access BigQuery.*
 The dataset contains two tables, `train` and `test`, to enable forecasting
 and BQML analytics queries.
 
-You will find this sample dataset in the
-`data-science/data_science/utils/data/` directory. To load this dataset into
-BigQuery, make sure you are still in the working directory
+You first need to download the dataset from [GitHub](https://github.com/google/adk-samples/tree/main/python/agents/data-science/data_science/utils/data/). To load this dataset into BigQuery, make sure you are still in the working directory
 (`agents/data-science`). Then run the following commands:
 ```bash
 python3 data_science/utils/create_bq_table.py
@@ -327,6 +333,8 @@ https://kaggle.com/competitions/playground-series-s5e1, 2025. Kaggle._
 
 ***NOTE:** This dataset uses BigQuery. Follow the steps in the [BigQuery Setup](#bigquery-setup)
 section to setup the database and configure the agent for database access.*
+
+You can find the flights dataset [here on GitHub](https://github.com/google/adk-samples/tree/main/python/agents/data-science/flights_dataset).
 
 1. Configure the environment variables as directed in the BigQuery Setup section below.
 Also export the BigQuery dataset id for this sample dataset:
@@ -737,6 +745,7 @@ You can clean up this agent sample by:
 - Deleting the [Cloud Run Services](https://console.cloud.google.com/run).
 - Deleting the GCS bucket (if created).
 - Deleting the service account (if no longer needed).
+
 
 
 ## Agent-to-Agent (A2A) API Interface

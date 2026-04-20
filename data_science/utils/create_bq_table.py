@@ -77,58 +77,68 @@ def create_dataset_if_not_exists(compute_project_id, data_project_id, dataset_na
         print(f"Created dataset {dataset_full_name}")
 
 
+def sanitize_table_name(filename):
+    """Sanitizes a filename into a BigQuery-compatible table name."""
+    name = filename.replace(".csv", "")
+    sanitized = name.replace("-", "_").replace(".", "_")
+    return sanitized
+
+
 def main():
+    import argparse
+
     current_directory = os.getcwd()
     print(f"Current working directory: {current_directory}")
 
-    """Main function to load CSV files into BigQuery."""
-    data_project_id = os.getenv("BQ_DATA_PROJECT_ID")
-    compute_project_id = os.getenv("BQ_COMPUTE_PROJECT_ID")
+    # Load environment variables
+    env_data_project_id = os.getenv("BQ_DATA_PROJECT_ID")
+    env_compute_project_id = os.getenv("BQ_COMPUTE_PROJECT_ID")
+
+    parser = argparse.ArgumentParser(description="Load a CSV file into BigQuery.")
+    parser.add_argument("--file", required=True, help="Path to the CSV file to upload.")
+    parser.add_argument(
+        "--bq-data-project-id",
+        default=env_data_project_id,
+        help="GCP Project for BQ data.",
+    )
+    parser.add_argument(
+        "--bq-compute-project-id",
+        default=env_compute_project_id,
+        help="GCP Project for BQ compute.",
+    )
+    parser.add_argument(
+        "--dataset-name",
+        default="synthetic_data",
+        help="The name of the BigQuery dataset.",
+    )
+
+    args = parser.parse_args()
+
+    data_project_id = args.bq_data_project_id
+    compute_project_id = args.bq_compute_project_id
+    dataset_name = args.dataset_name
+    csv_filepath = args.file
+
     if not data_project_id:
-        raise ValueError("BQ_DATA_PROJECT_ID environment variable not set.")
+        raise ValueError(
+            "BQ_DATA_PROJECT_ID not set via argument or environment variable.",
+        )
     if not compute_project_id:
-        raise ValueError("BQ_COMPUTE_PROJECT_ID environment variable not set.")
+        raise ValueError(
+            "BQ_COMPUTE_PROJECT_ID not set via argument or environment variable.",
+        )
 
-    # dataset_name = "forecasting_sticker_sales"
-    # train_csv_filepath = "data_science/utils/data/train.csv"
-    # test_csv_filepath = "data_science/utils/data/test.csv"
-
-    # # Create the dataset if it doesn't exist
-    # print("Creating dataset.")
-    # create_dataset_if_not_exists(compute_project_id, data_project_id, dataset_name)
-
-    # # Load the train data
-    # print("Loading train table.")
-    # load_csv_to_bigquery(data_project_id, dataset_name, "train", train_csv_filepath)
-
-    # # Load the test data
-    # print("Loading test table.")
-    # load_csv_to_bigquery(data_project_id, dataset_name, "test", test_csv_filepath)
-
-    ## Changes the lines below to load any other csv file you want to BigQuery
-    # 1) Specify the dataset name or change it to create a new one
-    # 2) Specify the csv file path
-    # 3) call create_dataset_if_not_exists function to create the dataset if it doesn't exist
-    # 4) call load_csv_to_bigquery function to load the csv file to a BigQuery table and give the table a name
-
-    # Step 1: Specify the dataset name
-    dataset_name = "synthetic_data"
-
-    # Step 2: Specify the csv file path
-    synthetic_csv_filepath = "data_science/utils/data/synthetic_marketing_data.csv"
-
-    # Step 3: Create the dataset if it doesn't exist
     print("Creating dataset.")
     create_dataset_if_not_exists(compute_project_id, data_project_id, dataset_name)
 
-    # Step 4: Load the csv file to a BigQuery table
-    print("Loading synthetic_marketing_data table.")
-    load_csv_to_bigquery(
-        data_project_id,
-        dataset_name,
-        "synthetic_marketing_data",
-        synthetic_csv_filepath,
-    )
+    filename = os.path.basename(csv_filepath)
+    table_name = sanitize_table_name(filename)
+
+    print(f"\nProcessing {filename} -> Table: {table_name}")
+    try:
+        load_csv_to_bigquery(data_project_id, dataset_name, table_name, csv_filepath)
+    except Exception as e:
+        print(f"Failed to upload {filename}: {e}")
 
 
 if __name__ == "__main__":

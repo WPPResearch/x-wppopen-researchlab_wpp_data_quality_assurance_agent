@@ -141,7 +141,7 @@ def main(
         pct_label = f"out_{round(pct)}_pt"
 
         # Strip original long base name if present
-        base_to_strip = "OI_training_data_sample_20260203_anonymized"
+        base_to_strip = "our_training_dataset_sample_anonymized"
         prefix = "" if file_stem == base_to_strip else f"{file_stem}_"
 
         csv_name = f"{prefix}{pct_label}.csv"

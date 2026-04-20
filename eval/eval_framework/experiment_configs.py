@@ -64,62 +64,62 @@ GROUND_TRUTH_DATA = load_ground_truth()
 TABLE_CONFIGS = [
     (
         "categorical_error_5pct",
-        "OI_training_data_sample_20260203_anonymized_categorical_error_5_percent",
+        "our_training_dataset_sample_anonymized_categorical_error_5_percent",
         "5% categorical errors",
     ),
     (
         "dropped_5pct",
-        "OI_training_data_sample_20260203_anonymized_dropped_5_percent",
+        "our_training_dataset_sample_anonymized_dropped_5_percent",
         "5% dropped columns",
     ),
     (
         "duplicate_5pct",
-        "OI_training_data_sample_20260203_anonymized_duplicate_5_percent",
+        "our_training_dataset_sample_anonymized_duplicate_5_percent",
         "5% duplicate rows",
     ),
     (
         "logical_error_1_5pct",
-        "OI_training_data_sample_20260203_anonymized_logical_error_1_5_percent",
+        "our_training_dataset_sample_anonymized_logical_error_1_5_percent",
         "5% clicks exceed impressions",
     ),
     (
         "logical_error_2_5pct",
-        "OI_training_data_sample_20260203_anonymized_logical_error_2_5_percent",
+        "our_training_dataset_sample_anonymized_logical_error_2_5_percent",
         "5% conversions exceed clicks",
     ),
     (
         "logical_error_3_5pct",
-        "OI_training_data_sample_20260203_anonymized_logical_error_3_5_percent",
+        "our_training_dataset_sample_anonymized_logical_error_3_5_percent",
         "5% spend with zero impressions",
     ),
     (
         "logical_error_4_5pct",
-        "OI_training_data_sample_20260203_anonymized_logical_error_4_5_percent",
+        "our_training_dataset_sample_anonymized_logical_error_4_5_percent",
         "5% video completions exceed plays",
     ),
     (
         "logical_error_5_5pct",
-        "OI_training_data_sample_20260203_anonymized_logical_error_5_5_percent",
+        "our_training_dataset_sample_anonymized_logical_error_5_5_percent",
         "5% purchases without add to cart",
     ),
     (
         "logical_error_6_5pct",
-        "OI_training_data_sample_20260203_anonymized_logical_error_6_5_percent",
+        "our_training_dataset_sample_anonymized_logical_error_6_5_percent",
         "5% landing page views exceed clicks",
     ),
     (
         "logical_error_7_5pct",
-        "OI_training_data_sample_20260203_anonymized_logical_error_7_5_percent",
+        "our_training_dataset_sample_anonymized_logical_error_7_5_percent",
         "5% negative metric values",
     ),
     (
         "missing_5pct",
-        "OI_training_data_sample_20260203_anonymized_missing_5_percent",
+        "our_training_dataset_sample_anonymized_missing_5_percent",
         "5% missing values (NULLs)",
     ),
     (
         "outlier_error_5pct",
-        "OI_training_data_sample_20260203_anonymized_outlier_error_5_percent",
+        "our_training_dataset_sample_anonymized_outlier_error_5_percent",
         "5% outlier errors",
     ),
 ]

@@ -160,11 +160,11 @@ async def main():
     )
 
     print("\n" + "=" * 60)
-    print("  PROMPT 4: audit table OI_training_data_sample_20260203_anonymized_batch_1")
+    print("  PROMPT 4: audit table our_training_dataset_sample_anonymized_batch_1")
     print("=" * 60)
     await run_agent(
         session.id,
-        "audit table OI_training_data_sample_20260203_anonymized_batch_1",
+        "audit table our_training_dataset_sample_anonymized_batch_1",
         output_file=output_filename,
     )
 

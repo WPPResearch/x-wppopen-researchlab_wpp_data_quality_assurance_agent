@@ -4,7 +4,9 @@ set -e
 # Project root
 cd "$(dirname "$0")/.."
 
-INPUT="data_science/utils/data/OI_training_data_sample_20260203_anonymized.csv"
+# Path to the source anonymized CSV file. Change this to your input file path.
+INPUT="data_science/utils/data/our_training_dataset_sample_anonymized.csv"
+# Percentages of error injection to run.
 PCTS="5 10 20 40"
 
 echo "=== Running Rule 1 ==="

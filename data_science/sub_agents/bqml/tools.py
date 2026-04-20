@@ -60,6 +60,9 @@ def rag_response(query: str) -> str:
     """
     corpus_name = os.getenv("BQML_RAG_CORPUS_NAME")
 
+    if not corpus_name:
+        return "RAG Corpus is not configured. Rely on your pre-trained knowledge."
+
     rag_retrieval_config = rag.RagRetrievalConfig(
         top_k=3,  # Optional
         filter=rag.Filter(vector_distance_threshold=0.5),  # Optional

@@ -8,6 +8,7 @@ import csv
 # Get paths relative to script location
 script_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(script_dir)
+# Root path where the dataset folders are located. Change this if your data is elsewhere.
 base_path = os.path.join(project_root, "data_science/utils/data")
 
 results = []
@@ -55,7 +56,7 @@ for d in dirs:
 
         base_name = csv_f.replace(".csv", "")
         # Skip the original base file if it's in a mixed dir
-        if base_name == "OI_training_data_sample_20260203_anonymized":
+        if base_name == "our_training_dataset_sample_anonymized":
             continue
 
         logical_rules = set()

@@ -820,7 +820,7 @@ options).
 Users are solely responsible for any further development, testing, security
 hardening, and deployment of agents based on this sample. We recommend thorough
 review, testing, and the implementation of appropriate safeguards before using
-any derived agent in a live or critical system
+any derived agent in a live or critical system.
 
 
 

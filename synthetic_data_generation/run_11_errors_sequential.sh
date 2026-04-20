@@ -8,7 +8,9 @@ cd "$(dirname "$0")/.."
 PCT=${1:-5}
 # 11 Errors (7 Logical + 4 Structural)
 NUM_ERRORS=11
-INPUT="data_science/utils/data/OI_training_data_sample_20260203_anonymized.csv"
+# Path to the source anonymized CSV file. Change this to your input file path.
+INPUT="data_science/utils/data/our_training_dataset_sample_anonymized.csv"
+# Output directory for the stacked files. Change this to your desired output folder.
 OUT_DIR="data_science/utils/data/mixed_${NUM_ERRORS}_errors_stacked"
 
 # Ensure output directory exists
@@ -17,7 +19,7 @@ mkdir -p "$OUT_DIR"
 echo "=== Starting Sequential Mixed Injection (Errors: $NUM_ERRORS, Percentage: $PCT%) ==="
 
 # Copy base file to start the chain
-CURRENT_FILE="$OUT_DIR/OI_training_data_sample_20260203_anonymized.csv"
+CURRENT_FILE="$OUT_DIR/our_training_dataset_sample_anonymized.csv"
 cp "$INPUT" "$CURRENT_FILE"
 
 # Function to update CURRENT_FILE and STEM
@@ -25,7 +27,7 @@ update_current() {
     suffix=$1
     STEM=$(basename "$CURRENT_FILE" .csv)
     # If the STEM is the original long name, the Python script stripped it
-    if [[ "$STEM" == "OI_training_data_sample_20260203_anonymized" ]]; then
+    if [[ "$STEM" == "our_training_dataset_sample_anonymized" ]]; then
         CURRENT_FILE="$OUT_DIR/${suffix}_${PCT}_pt.csv"
     else
         CURRENT_FILE="$OUT_DIR/${STEM}_${suffix}_${PCT}_pt.csv"

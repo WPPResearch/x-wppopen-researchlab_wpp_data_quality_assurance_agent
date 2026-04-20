@@ -14,8 +14,8 @@ from a2a.types import TransportProtocol
 # Increase recursion depth just in case
 sys.setrecursionlimit(2000)
 
-# Configure the agent endpoint
-AGENT_BASE_URL = "https://ds-adk-agent-895433275768.us-central1.run.app"
+# Configure the agent endpoint (e.g., "https://YOUR-SERVICE-NAME-YOUR-PROJECT-ID.REGION.run.app")
+AGENT_BASE_URL = ""
 
 
 async def main():

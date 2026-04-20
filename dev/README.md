@@ -2,30 +2,24 @@ This folder contains the instructions and datasets used for generating a new syn
 
 ## Datasets
 
-The following datasets were provided by Konstantinos Karagiannis and are used as a basis for the synthetic data generation:
+The following datasets are used as a basis for the synthetic data generation:
 
-  * **Dataset 1:** [OI\_operational\_data\_sample\_20260203.csv](https://drive.google.com/file/d/1wU_N-eZRckSBzDwl2sjsK_D-trdw1-SL/view?usp=drive_link)
-  * **Dataset 2 (Training Dataset):** [OI\_training\_data\_sample\_20260203.csv](https://drive.google.com/file/d/1d1H1CGq8rDj0SCeUbRdW8Af_w5sZTsIt/view?usp=drive_link)
+  * **Dataset 1:** `our_dataset_sample.csv`
+  * **Dataset 2 (Training Dataset):** `our_training_dataset_sample.csv`
 
 ## Synthetic Dataset Generation Instructions
 
 The following steps are applied to **Dataset 2** to create the new synthetic dataset:
 
 1.  Extract the schema: Execute the script `extract_schema.py`. This will analyze your dataset and output a file named `<dataset>_schema.txt` containing the unique values for each column.
-1.  Edit and version the schema to meet your requirements. Our changes for this dataset are:
+1.  Edit and version the schema to meet your requirements. Example changes could be:
     - Drop the empty columns in the schema.
-    - For security reasons, create new unique values for specific columns as advised by Kostas. The columns for which new unique values are created are:
-        * **`brand__brand`**
-        * **`brand__advertiser_name`**
-        * **`campaign__campaign_name`**
-        * **`campaign__media_buy_name`**
-        * **`creative__name`**
-        * *(Note: `campaign__media_buy_name` was added to the list as its data was similar to `campaign__campaign_name`.)*
-    - Drop the column **`creative__gcs_path`** to reduce the dataset size.
+    - For security reasons, create new unique anonymized values for specific sensitive columns (e.g. usernames, account names, or external IDs).
+    - Drop any excessive or unnecessary columns to reduce the dataset size.
 1. Version the schema file properly, such as
-`OI_operational_data_sample_20260203_schema_v1.txt`.
+`our_dataset_sample_schema_v1.txt`.
 1. Generate new data: Once your schema is ready, use it as input to the `synthetic_generator.py` script. This will generate new synthetic data based on your edited schema version. The output file will be named automatically by the script: it replaces `schema` with `synthetic_dataset` and uses the `.csv` extension. For example:
-    - `OI_training_data_sample_20260203_schema_v1.txt` → `OI_training_data_sample_20260203_synthetic_dataset_v1.csv`
+    - `our_training_dataset_sample_schema_v1.txt` → `our_training_dataset_sample_synthetic_dataset_v1.csv`
 
 ## Agent-to-Agent (A2A) Development Scripts
 

@@ -10,11 +10,11 @@ Replaces real values in the following columns with generic labels to remove PII 
 
 | Column                       | Mapped to                                    |
 | ---------------------------- | -------------------------------------------- |
-| `brand__brand`             | `brand1`, `brand2`, …                   |
-| `brand__advertiser_name`   | `advertiser1`, `advertiser2`, …         |
-| `campaign__campaign_name`  | `campaign1`, `campaign2`, …             |
-| `campaign__media_buy_name` | `campaign_media1`, `campaign_media2`, … |
-| `creative__name`           | `creative1`, `creative2`, …             |
+| `sensitive_column_1`        | `label_1`, `label_1`, …                      |
+| `sensitive_column_2`        | `label_2`, `label_2`, …                      |
+| `sensitive_column_3`        | `label_3`, `label_3`, …                      |
+| `sensitive_column_4`        | `label_4`, `label_4`, …                      |
+| `sensitive_column_5`        | `label_5`, `label_5`, …                      |
 
 - Mapping is deterministic (same input → same output).
 - `NaN` values are preserved as-is.
@@ -163,7 +163,7 @@ The following sequence uses `anonymize_csv.py` for data preparation, followed by
 ```bash
 # 1. Anonymize
 uv run python synthetic_data_generation/anonymize_csv.py \
-  --input data_science/utils/data/OI_training_data_sample_20260203.csv
+  --input data_science/utils/data/our_training_dataset_sample.csv
 
 # 2. Inject structural and logical errors
 ./synthetic_data_generation/run_structural_errors.sh
@@ -208,7 +208,7 @@ uv run python synthetic_data_generation/generate_summary.py
 Every injection step produces a **sidecar JSON file** for each generated CSV:
 
 **Log file:** `[short_name]_N_pt.json`
-Records every cell or row that was modified for a specific error percentage, including the original value. Use these as ground truth for evaluating detection accuracy. Note: long `OI_training_` prefixes are stripped from generated files to prevent OS file name limits during sequential testing.
+Records every cell or row that was modified for a specific error percentage, including the original value. Use these as ground truth for evaluating detection accuracy. Note: long dataset prefixes are stripped from generated files to prevent OS file name limits during sequential testing.
 
 
 ---
@@ -257,8 +257,8 @@ Records every cell or row that was modified for a specific error percentage, inc
 ```json
 {
   "row_index": 88,
-  "column": "brand__brand",
-  "original_value": "brand3",
+  "column": "sensitive_column_1",
+  "original_value": "label_1_original",
   "injected_value": "xK7pQmRz",
   "error_type": "categorical_error",
   "error_pct": 5.0

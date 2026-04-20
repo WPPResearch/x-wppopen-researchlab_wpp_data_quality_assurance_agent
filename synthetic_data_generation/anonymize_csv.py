@@ -11,14 +11,15 @@ from pathlib import Path
 
 import pandas as pd
 
-INPUT_CSV = "/Users/thanos/Desktop/Satalia-projects/Bitbucket/data_science_agent_adk/data_science/utils/data/OI_training_data_sample_20260203.csv"
+# Provide the absolute path to your input CSV file here (e.g. "/path/to/your_data.csv")
+INPUT_CSV = ""
 
 ANONYMIZE_MAP = {
-    "brand__brand": "brand",
-    "brand__advertiser_name": "advertiser",
-    "campaign__campaign_name": "campaign",
-    "campaign__media_buy_name": "campaign_media",
-    "creative__name": "creative",
+    "sensitive_column_1": "label_1",
+    "sensitive_column_2": "label_2",
+    "sensitive_column_3": "label_3",
+    "sensitive_column_4": "label_4",
+    "sensitive_column_5": "label_5",
 }
 
 

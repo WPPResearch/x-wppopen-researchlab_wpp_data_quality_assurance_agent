@@ -1,5 +1,7 @@
 # Data Quality Assurance Agent
 
+> **Note:** This repository has been migrated to WPPOpen to be open sourced. All future fixes and improvements will be done on the [WPPOpen repository](https://github.com/WPPOpen/x-wppopen-researchlab_wpp_data_quality_assurance_agent).
+
 ## Table of Contents
 
 - [Executive Summary](#executive-summary)
@@ -29,6 +31,7 @@
 - [Optimizing and Adjustment Tips](#optimizing-and-adjustment-tips)
 - [Troubleshooting](#troubleshooting)
 - [Deployment on Google Cloud Run](#deployment-on-google-cloud-run)
+- [Bitbucket Pipelines (CI/CD)](#bitbucket-pipelines-cicd)
 - [Agent-to-Agent (A2A) API Interface](#agent-to-agent-a2a-api-interface)
 - [Disclaimer](#disclaimer)
 
@@ -167,6 +170,9 @@ set up the data sources to be used with the agent.
     # Optional: GCS bucket for persistent artifact storage (images, PDFs, reports)
     ARTIFACT_BUCKET_NAME=''
     ```
+
+    *NOTE: Ensure that the identity you are using to run the agent has the appropriate Google Cloud IAM permissions granted on your project. At a minimum, you will need roles such as `Vertex AI User`, `BigQuery Data Editor`, and `BigQuery Job User` for the core features to work.*
+
 <a id="authenticate-the-google-cloud-cli"></a>
 1.  **Authenticate the Google Cloud CLI:**
     - A Google Cloud project with billing enabled.
@@ -187,26 +193,19 @@ set up the data sources to be used with the agent.
        aiplatform.googleapis.com
     ```
 
-1.  **BQML Setup:**
+1.  **BQML Setup (Optional):**
 
-    The BQML Agent uses the Vertex AI RAG Engine to query the full BigQuery ML
-    Reference Guide.
+    The BQML Agent can use the Vertex AI RAG Engine to query the full BigQuery ML Reference Guide for syntax help. **This step is entirely optional.** If you skip it, the agent will rely on its pre-trained knowledge to write SQL queries.
 
-    Before running the setup, ensure your project ID is added in .env file:
-    `"GOOGLE_CLOUD_PROJECT"`. Leave the corpus name empty in the .env file:
-    `BQML_RAG_CORPUS_NAME = ''`. The corpus name will be added automatically
-    once it's created.
+    If you choose to enable this feature, ensure your project ID is added in the `.env` file under `"GOOGLE_CLOUD_PROJECT"`. Leave the corpus name empty: `BQML_RAG_CORPUS_NAME = ''`. The corpus name will be added automatically once created.
 
-    To set up the RAG Corpus for your project, run the methods
-    `create_RAG_corpus()` and `ingest_files()` in
-    `data-science/data_science/utils/reference_guide_RAG.py` by running the
-    below command from the working directory:
+    To set up the RAG Corpus for your project, run the following command from the working directory:
 
     ```bash
     python3 data_science/utils/reference_guide_RAG.py
     ```
 
-    NOTE: The default documents that the RAG has been ingested with are [here](https://console.cloud.google.com/storage/browser/cloud-samples-data/adk-samples/data-science/bqml?authuser=1&pageState=(%22StorageObjectListTable%22:(%22f%22:%22%255B%255D%22))).
+    *NOTE: The default documents that the RAG engine ingests are located [here](https://console.cloud.google.com/storage/browser/cloud-samples-data/adk-samples/data-science/bqml?authuser=1&pageState=(%22StorageObjectListTable%22:(%22f%22:%22%255B%255D%22))).*
 
 
 1.  **Code Interpreter Setup:**
@@ -229,6 +228,15 @@ set up the data sources to be used with the agent.
     querying Gemini directly, or [CHASE-SQL](https://arxiv.org/abs/2410.01943).
     Set the variable `NL2SQL_METHOD` to either `BASELINE` (to use Gemini) or
     `CHASE` to use CHASE-SQL.
+
+1.  **Run the agent:**
+
+    Run agent with ADK Web UI:
+    ```bash
+    uv run adk web
+    ```
+
+    For more information on running the agent, such as via the CLI, please see the [Running the Agent](#running-the-agent) section below.
 
 ## Database Setup
 
@@ -308,9 +316,7 @@ agent to access BigQuery.*
 The dataset contains two tables, `train` and `test`, to enable forecasting
 and BQML analytics queries.
 
-You will find this sample dataset in the
-`data-science/data_science/utils/data/` directory. To load this dataset into
-BigQuery, make sure you are still in the working directory
+You first need to download the dataset from [GitHub](https://github.com/google/adk-samples/tree/main/python/agents/data-science/data_science/utils/data/). To load this dataset into BigQuery, make sure you are still in the working directory
 (`agents/data-science`). Then run the following commands:
 ```bash
 python3 data_science/utils/create_bq_table.py
@@ -327,6 +333,8 @@ https://kaggle.com/competitions/playground-series-s5e1, 2025. Kaggle._
 
 ***NOTE:** This dataset uses BigQuery. Follow the steps in the [BigQuery Setup](#bigquery-setup)
 section to setup the database and configure the agent for database access.*
+
+You can find the flights dataset [here on GitHub](https://github.com/google/adk-samples/tree/main/python/agents/data-science/flights_dataset).
 
 1. Configure the environment variables as directed in the BigQuery Setup section below.
 Also export the BigQuery dataset id for this sample dataset:
@@ -738,6 +746,60 @@ You can clean up this agent sample by:
 - Deleting the GCS bucket (if created).
 - Deleting the service account (if no longer needed).
 
+## Bitbucket Pipelines (CI/CD)
+
+This project includes a `bitbucket-pipelines.yml` file that automates linting, building, and deploying the agent to Google Cloud Run.
+
+### Pipeline Steps
+
+The pipeline defines three reusable steps:
+
+#### 1. Run Linting
+- **Triggers:** Every pull request and every commit to `main`.
+- **What it does:** Installs `uv`, syncs dependencies from `pyproject.toml` via `uv sync --frozen`, and runs `uv run ruff check .` to enforce code quality.
+
+#### 2. Deploy Agent (A2A API)
+- **Triggers:** Commits to `main` only (after linting passes).
+- **Image:** `google/cloud-sdk:latest`
+- **What it does:**
+  1. Authenticates with GCP using the `AGENTS_CI` service account key.
+  2. Builds the Docker image using `Dockerfile` (headless A2A API agent).
+  3. Tags and pushes the image to **Google Artifact Registry**.
+  4. Deploys to **Cloud Run** as `ds-adk-agent` on port **8000**, with all runtime env vars injected from Bitbucket repository variables.
+  5. Uses the dedicated service account `ds-adk-agent@${PROJECT_ID}.iam.gserviceaccount.com`.
+
+#### 3. Deploy UI Agent (Web Interface)
+- **Triggers:** Commits to `main` only (after linting passes).
+- **Image:** `google/cloud-sdk:latest`
+- **What it does:**
+  1. Authenticates with GCP using the `AGENTS_CI` service account key.
+  2. Builds the Docker image using `Dockerfile_ui` (includes the ADK Web UI).
+  3. Tags and pushes the image to **Google Artifact Registry**.
+  4. Deploys to **Cloud Run** as `data-science-agent` on port **8080**, using Agent Engine for both session and memory storage.
+  5. Uses the service account `ds-adk-agent@${PROJECT_ID}.iam.gserviceaccount.com`.
+
+### Required Bitbucket Repository Variables
+
+Configure these in **Bitbucket → Repository Settings → Repository Variables**:
+
+| Variable | Description |
+| --- | --- |
+| `PROJECT_ID` | Google Cloud Project ID (e.g., `my-project-id`) |
+| `REGION` | GCP region (e.g., `us-central1`) |
+| `ARTIFACT_REGISTRY_REPO_NAME` | Name of the Artifact Registry Docker repository |
+| `AGENTS_CI` | Service account key JSON with permissions for Cloud Run deploy, Artifact Registry push, and IAM |
+| `APP_URL` | The public URL for the deployed A2A agent |
+| `BQ_DATASET_ID` | BigQuery dataset ID (e.g., `synthetic_data`) |
+| `ARTIFACT_BUCKET_NAME` | GCS bucket name for persistent artifact storage (e.g., `ds-agent-artifacts`) |
+| `ROOT_AGENT_MODEL` | Model for the root agent (e.g., `gemini-2.5-flash`) |
+| `ANALYTICS_AGENT_MODEL` | Model for the analytics agent |
+| `BIGQUERY_AGENT_MODEL` | Model for the BigQuery agent |
+| `BQML_AGENT_MODEL` | Model for the BQML agent |
+| `BASELINE_NL2SQL_MODEL` | Model for baseline NL2SQL |
+| `CHASE_NL2SQL_MODEL` | Model for CHASE NL2SQL (optional) |
+| `REPORT_AGENT_MODEL` | Model for the report agent |
+| `ARTIFACT_AGENT_MODEL` | Model for the artifact agent |
+| `MEMORY_SERVICE_URI` | Vertex AI Agent Engine Memory URI - **IMPORTANT**: Enter without quotes (e.g., `projects/123/locations/us-central1/reasoningEngines/456` or `agentengine://456`) |
 
 ## Agent-to-Agent (A2A) API Interface
 

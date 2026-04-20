@@ -31,7 +31,7 @@
 - [Optimizing and Adjustment Tips](#optimizing-and-adjustment-tips)
 - [Troubleshooting](#troubleshooting)
 - [Deployment on Google Cloud Run](#deployment-on-google-cloud-run)
-- [Bitbucket Pipelines (CI/CD)](#bitbucket-pipelines-cicd)
+
 - [Agent-to-Agent (A2A) API Interface](#agent-to-agent-a2a-api-interface)
 - [Disclaimer](#disclaimer)
 
@@ -746,60 +746,7 @@ You can clean up this agent sample by:
 - Deleting the GCS bucket (if created).
 - Deleting the service account (if no longer needed).
 
-## Bitbucket Pipelines (CI/CD)
 
-This project includes a `bitbucket-pipelines.yml` file that automates linting, building, and deploying the agent to Google Cloud Run.
-
-### Pipeline Steps
-
-The pipeline defines three reusable steps:
-
-#### 1. Run Linting
-- **Triggers:** Every pull request and every commit to `main`.
-- **What it does:** Installs `uv`, syncs dependencies from `pyproject.toml` via `uv sync --frozen`, and runs `uv run ruff check .` to enforce code quality.
-
-#### 2. Deploy Agent (A2A API)
-- **Triggers:** Commits to `main` only (after linting passes).
-- **Image:** `google/cloud-sdk:latest`
-- **What it does:**
-  1. Authenticates with GCP using the `AGENTS_CI` service account key.
-  2. Builds the Docker image using `Dockerfile` (headless A2A API agent).
-  3. Tags and pushes the image to **Google Artifact Registry**.
-  4. Deploys to **Cloud Run** as `ds-adk-agent` on port **8000**, with all runtime env vars injected from Bitbucket repository variables.
-  5. Uses the dedicated service account `ds-adk-agent@${PROJECT_ID}.iam.gserviceaccount.com`.
-
-#### 3. Deploy UI Agent (Web Interface)
-- **Triggers:** Commits to `main` only (after linting passes).
-- **Image:** `google/cloud-sdk:latest`
-- **What it does:**
-  1. Authenticates with GCP using the `AGENTS_CI` service account key.
-  2. Builds the Docker image using `Dockerfile_ui` (includes the ADK Web UI).
-  3. Tags and pushes the image to **Google Artifact Registry**.
-  4. Deploys to **Cloud Run** as `data-science-agent` on port **8080**, using Agent Engine for both session and memory storage.
-  5. Uses the service account `ds-adk-agent@${PROJECT_ID}.iam.gserviceaccount.com`.
-
-### Required Bitbucket Repository Variables
-
-Configure these in **Bitbucket → Repository Settings → Repository Variables**:
-
-| Variable | Description |
-| --- | --- |
-| `PROJECT_ID` | Google Cloud Project ID (e.g., `my-project-id`) |
-| `REGION` | GCP region (e.g., `us-central1`) |
-| `ARTIFACT_REGISTRY_REPO_NAME` | Name of the Artifact Registry Docker repository |
-| `AGENTS_CI` | Service account key JSON with permissions for Cloud Run deploy, Artifact Registry push, and IAM |
-| `APP_URL` | The public URL for the deployed A2A agent |
-| `BQ_DATASET_ID` | BigQuery dataset ID (e.g., `synthetic_data`) |
-| `ARTIFACT_BUCKET_NAME` | GCS bucket name for persistent artifact storage (e.g., `ds-agent-artifacts`) |
-| `ROOT_AGENT_MODEL` | Model for the root agent (e.g., `gemini-2.5-flash`) |
-| `ANALYTICS_AGENT_MODEL` | Model for the analytics agent |
-| `BIGQUERY_AGENT_MODEL` | Model for the BigQuery agent |
-| `BQML_AGENT_MODEL` | Model for the BQML agent |
-| `BASELINE_NL2SQL_MODEL` | Model for baseline NL2SQL |
-| `CHASE_NL2SQL_MODEL` | Model for CHASE NL2SQL (optional) |
-| `REPORT_AGENT_MODEL` | Model for the report agent |
-| `ARTIFACT_AGENT_MODEL` | Model for the artifact agent |
-| `MEMORY_SERVICE_URI` | Vertex AI Agent Engine Memory URI - **IMPORTANT**: Enter without quotes (e.g., `projects/123/locations/us-central1/reasoningEngines/456` or `agentengine://456`) |
 
 ## Agent-to-Agent (A2A) API Interface
 

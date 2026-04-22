@@ -18,7 +18,7 @@ from google.adk.agents.remote_a2a_agent import (
 sys.setrecursionlimit(2000)
 
 # Configure the agent endpoint
-AGENT_BASE_URL = "https://ds-adk-agent-895433275768.us-central1.run.app"
+AGENT_BASE_URL = os.getenv("AGENT_URL", "")
 
 
 async def main():

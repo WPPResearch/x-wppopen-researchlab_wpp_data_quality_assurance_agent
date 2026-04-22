@@ -21,13 +21,11 @@ from vertexai import rag
 
 # Define the path to the .env file
 env_file_path = Path(__file__).parent.parent.parent / ".env"
-print(env_file_path)
 
 # Load environment variables from the specified .env file
 load_dotenv(dotenv_path=env_file_path)
 
 PROJECT_ID = os.getenv("GOOGLE_CLOUD_PROJECT")
-print(PROJECT_ID)
 corpus_name = os.getenv("BQML_RAG_CORPUS_NAME")
 
 display_name = "bqml_referenceguide_corpus"

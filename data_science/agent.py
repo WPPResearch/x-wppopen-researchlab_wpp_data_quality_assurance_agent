@@ -71,25 +71,27 @@ _OTEL_EXPORTER_OTLP_ENDPOINT = f"{_WANDB_BASE_URL}/otel/v1/traces"
 
 # Set up authentication
 _WANDB_API_KEY = os.getenv("WANDB_API_KEY")
-_WANDB_AUTH = base64.b64encode(f"api:{_WANDB_API_KEY}".encode()).decode()
 
-_OTEL_EXPORTER_OTLP_HEADERS = {
-    "Authorization": f"Basic {_WANDB_AUTH}",
-    "project_id": _WANDB_PROJECT_ID,
-}
+if _WANDB_API_KEY:
+    _WANDB_AUTH = base64.b64encode(f"api:{_WANDB_API_KEY}".encode()).decode()
 
-# Create the OTLP span exporter with endpoint and headers
-exporter = OTLPSpanExporter(
-    endpoint=_OTEL_EXPORTER_OTLP_ENDPOINT,
-    headers=_OTEL_EXPORTER_OTLP_HEADERS,
-)
+    _OTEL_EXPORTER_OTLP_HEADERS = {
+        "Authorization": f"Basic {_WANDB_AUTH}",
+        "project_id": _WANDB_PROJECT_ID,
+    }
 
-# Create a tracer provider and add the exporter
-_tracer_provider = trace_sdk.TracerProvider()
-_tracer_provider.add_span_processor(SimpleSpanProcessor(exporter))
+    # Create the OTLP span exporter with endpoint and headers
+    exporter = OTLPSpanExporter(
+        endpoint=_OTEL_EXPORTER_OTLP_ENDPOINT,
+        headers=_OTEL_EXPORTER_OTLP_HEADERS,
+    )
 
-# Set the global tracer provider BEFORE importing/using ADK
-trace.set_tracer_provider(_tracer_provider)
+    # Create a tracer provider and add the exporter
+    _tracer_provider = trace_sdk.TracerProvider()
+    _tracer_provider.add_span_processor(SimpleSpanProcessor(exporter))
+
+    # Set the global tracer provider BEFORE importing/using ADK
+    trace.set_tracer_provider(_tracer_provider)
 
 # Set up logging
 # Note this level can be overridden by adk web on the command line;

@@ -205,7 +205,7 @@ set up the data sources to be used with the agent.
     python3 data_science/utils/reference_guide_RAG.py
     ```
 
-    *NOTE: The default documents that the RAG engine ingests are located [here](https://console.cloud.google.com/storage/browser/cloud-samples-data/adk-samples/data-science/bqml?authuser=1&pageState=(%22StorageObjectListTable%22:(%22f%22:%22%255B%255D%22))).*
+    *NOTE: The default documents that the RAG engine ingests are located [here](https://console.cloud.google.com/storage/browser/cloud-samples-data/adk-samples/data-science/bqml?pageState=(%22StorageObjectListTable%22:(%22f%22:%22%255B%255D%22))).*
 
 
 1.  **Code Interpreter Setup:**
@@ -313,13 +313,11 @@ fields, `child` and `parent`, each with the same fields:
 [BigQuery Setup](#bigquery-setup) section to setup and configure the
 agent to access BigQuery.*
 
-The dataset contains two tables, `train` and `test`, to enable forecasting
-and BQML analytics queries.
+You can upload any dataset you want to BigQuery using the `create_bq_table` script by providing the path to your CSV file (both relative and absolute paths are supported) and the target dataset name. To load the sticker sales dataset (or any other dataset of your choice), make sure you are still in the working directory (`agents/data-science`) and run the following commands:
 
-You first need to download the dataset from [GitHub](https://github.com/google/adk-samples/tree/main/python/agents/data-science/data_science/utils/data/). To load this dataset into BigQuery, make sure you are still in the working directory
-(`agents/data-science`). Then run the following commands:
 ```bash
-python3 data_science/utils/create_bq_table.py
+python3 data_science/utils/create_bq_table.py --file /absolute/or/relative/path/to/train.csv --dataset-name forecasting_sticker_sales
+python3 data_science/utils/create_bq_table.py --file /absolute/or/relative/path/to/test.csv --dataset-name forecasting_sticker_sales
 ```
 
 Set the following environment variable in your `.env` file to use this dataset:
@@ -722,6 +720,9 @@ To deploy the Data Science agent with the Web UI enabled, use the `Dockerfile_ui
       --set-env-vars ARTIFACT_BUCKET_NAME=${ARTIFACT_BUCKET_NAME},SERVE_WEB_INTERFACE=True,GOOGLE_CLOUD_PROJECT=${PROJECT_ID},GOOGLE_CLOUD_LOCATION=us-central1,GOOGLE_GENAI_USE_VERTEXAI=TRUE,BQ_DATASET_ID=forecasting_sticker_sales,BQ_DATA_PROJECT_ID=${PROJECT_ID},BQ_COMPUTE_PROJECT_ID=${PROJECT_ID},ROOT_AGENT_MODEL=gemini-2.5-flash,ANALYTICS_AGENT_MODEL=gemini-2.5-flash,BIGQUERY_AGENT_MODEL=gemini-2.5-flash,BQML_AGENT_MODEL=gemini-2.5-flash,BASELINE_NL2SQL_MODEL=gemini-2.5-flash,CHASE_NL2SQL_MODEL=gemini-2.5-flash,MEMORY_SERVICE_URI=${MEMORY_SERVICE_URI},OTEL_TRACES_EXPORTER=none,DATASET_CONFIG_FILE=./dataset_configs/forecasting_sticker_sales_dataset_config.json \
       --region us-central1
     ```
+
+    > [!CAUTION]
+    > The `--allow-unauthenticated` flag makes your Cloud Run service publicly accessible without requiring Google Cloud IAM authentication. Do not use this for sensitive internal deployments.
 
     **Note:**
     - Sessions use in-memory storage by default (lost on restart)

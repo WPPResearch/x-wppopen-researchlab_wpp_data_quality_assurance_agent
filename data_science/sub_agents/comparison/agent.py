@@ -14,6 +14,7 @@
 
 """Comparison Agent: make comparisons between tables of datasets."""
 
+import logging
 import os
 from google.adk.agents import Agent
 from google.adk.agents.callback_context import CallbackContext
@@ -35,7 +36,7 @@ def setup_before_agent_call(callback_context: CallbackContext):
     db_settings = {
         "bigquery": get_bq_database_settings(),
     }
-    print(db_settings)
+    logging.getLogger(__name__).debug("DB Settings: %s", db_settings)
     callback_context.state["database_settings"] = db_settings
 
     schema = callback_context.state["database_settings"]["bigquery"]["schema"]

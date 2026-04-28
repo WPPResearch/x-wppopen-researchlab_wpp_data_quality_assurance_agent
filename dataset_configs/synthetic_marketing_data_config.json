@@ -1,0 +1,9 @@
+{
+  "datasets": [
+    {
+      "type": "bigquery",
+      "name": "synthetic_data",
+      "description": "This dataset was created using Gemini for a few with simple data of the marketing domain."
+    }
+  ]
+}

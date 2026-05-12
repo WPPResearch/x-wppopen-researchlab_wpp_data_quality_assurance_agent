@@ -60,7 +60,7 @@ The key features of the Data Quality Assurance Agent include:
 
 
 ### Architecture
-![Data Science Architecture](readme_data/data-science-architecture.svg)
+![Data Science Architecture](readme_data/data-science-architecture.png)
 
 ### Key Features
 
@@ -117,8 +117,7 @@ set up the data sources to be used with the agent.
     dependencies into a virtual environment managed by uv. On the first run,
     this command will also create a new virtual environment.
 
-    By default, the virtual environment will be created in a `.venv` directory
-    inside `adk-samples/python/agents/data-science`. If you already have a virtual
+    By default, the virtual environment will be created in a `.venv` directory. If you already have a virtual
     environment created, or you want to use a different location, you can use
     the `--active` flag for `uv` commands, and/or change the
     `UV_PROJECT_ENVIRONMENT` environment variable. See
@@ -540,27 +539,13 @@ the following:
 If so, what are the ID columns? (e.g., `country`, `store`, `product`)
 
 
-## Testing and Evaluation
+## Testing
 
 To run the test and evaluation code, you need a few additional dependencies. Run
 the following uv command from the `agents/data-science` directory to install them:
 ```bash
 uv sync
 ```
-
-### Running Evaluations
-
-Evaluation tests assess the overall performance and capabilities of the agent in
-a holistic manner.
-
-**Run Evaluation Tests:**
-
-```bash
-uv run pytest eval
-```
-
-- This command executes all test files within the `eval/` directory.
-- `uv run` ensures that pytest runs within the project's virtual environment.
 
 ### Running Tests
 

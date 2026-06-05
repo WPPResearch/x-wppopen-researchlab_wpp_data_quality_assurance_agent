@@ -352,13 +352,32 @@ def save_experiment_results(
     """
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     experiment_dir = os.path.join(RESULTS_DIR, experiment_name, timestamp)
-    os.makedirs(experiment_dir, exist_ok=True)
+
+    from pathlib import Path
+
+    def validate_path(path_str: str) -> Path:
+        p = Path(path_str).resolve()
+        safe_bases = [
+            Path.cwd().resolve(),
+            Path.home().resolve(),
+            Path("/tmp").resolve(),
+        ]
+        if not any(p.is_relative_to(base) for base in safe_bases):
+            raise ValueError(f"Path traversal detected: {path_str}")
+        return p
+
+    validated_experiment_dir = validate_path(experiment_dir)
+    os.makedirs(validated_experiment_dir, exist_ok=True)
 
     # Save each audit response
     for i, r in enumerate(results):
         label = f"{r['table_key']}_{r['prompt_level']}_{r['memory_mode']}"
-        response_file = os.path.join(experiment_dir, f"response_{label}.txt")
-        with open(response_file, "w", encoding="utf-8") as f:
+        response_file = os.path.join(
+            str(validated_experiment_dir),
+            f"response_{label}.txt",
+        )
+        validated_response_file = validate_path(response_file)
+        with open(validated_response_file, "w", encoding="utf-8") as f:
             f.write(r["response_text"])
 
     # Save metadata
@@ -367,16 +386,18 @@ def save_experiment_results(
         "timestamp": timestamp,
         "runs": [{k: v for k, v in r.items() if k != "response_text"} for r in results],
     }
-    metadata_file = os.path.join(experiment_dir, "metadata.json")
-    with open(metadata_file, "w", encoding="utf-8") as f:
+    metadata_file = os.path.join(str(validated_experiment_dir), "metadata.json")
+    validated_metadata_file = validate_path(metadata_file)
+    with open(validated_metadata_file, "w", encoding="utf-8") as f:
         json.dump(metadata, f, indent=2)
 
     # Save scorecard
     if scorecard:
-        scorecard_file = os.path.join(experiment_dir, "scorecard.txt")
-        with open(scorecard_file, "w", encoding="utf-8") as f:
+        scorecard_file = os.path.join(str(validated_experiment_dir), "scorecard.txt")
+        validated_scorecard_file = validate_path(scorecard_file)
+        with open(validated_scorecard_file, "w", encoding="utf-8") as f:
             f.write(scorecard)
             f.write("\n")
 
-    print(f"\n💾 Results saved to: {experiment_dir}")
-    return experiment_dir
+    print(f"\n💾 Results saved to: {validated_experiment_dir}")
+    return str(validated_experiment_dir)

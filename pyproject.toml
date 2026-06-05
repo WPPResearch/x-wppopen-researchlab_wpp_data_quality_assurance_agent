@@ -10,8 +10,8 @@ readme = "README.md"
 requires-python = ">=3.12"
 
 dependencies = [
-    "python-dotenv>=1.0.1",
-    "google-adk>=1.14",
+    "python-dotenv>=1.2.2",
+    "google-adk>=1.28.1",
     "immutabledict>=4.2.1",
     "sqlglot>=26.10.1",
     "db-dtypes>=1.4.2",
@@ -31,9 +31,9 @@ dependencies = [
     "matplotlib>=3.10.8",
     "fpdf2>=2.8.5",
     "markdown2>=2.5.4",
-    "a2a-sdk>=0.2.7",
-    "python-multipart>=0.0.22",
-    "nltk>=3.9.2",
+    "a2a-sdk>=0.2.7,<1.0.0",
+    "python-multipart>=0.0.27",
+    "nltk>=3.9.4",
     "asyncpg>=0.31.0",
 ]
 

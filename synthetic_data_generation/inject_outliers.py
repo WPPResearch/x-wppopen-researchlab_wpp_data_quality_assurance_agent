@@ -112,7 +112,20 @@ def main(
     output_dir: str | None,
     multiplier: float = 10.0,
 ) -> None:
-    src_file = Path(input_file)
+    def validate_path(path_str: str | None) -> Path | None:
+        if path_str is None:
+            return None
+        p = Path(path_str).resolve()
+        safe_bases = [
+            Path.cwd().resolve(),
+            Path.home().resolve(),
+            Path("/tmp").resolve(),
+        ]
+        if not any(p.is_relative_to(base) for base in safe_bases):
+            raise ValueError(f"Path traversal detected: {path_str}")
+        return p
+
+    src_file = validate_path(input_file)
     if not src_file.exists():
         raise FileNotFoundError(f"Input file not found: {src_file}")
 
@@ -120,9 +133,11 @@ def main(
     file_stem = src_file.stem
 
     if output_dir:
-        out_dir = Path(output_dir)
+        out_dir = validate_path(output_dir)
     else:
-        out_dir = src_file.parent / f"{file_stem}_outlier_errors_injected"
+        out_dir = validate_path(
+            str(src_file.parent / f"{file_stem}_outlier_errors_injected"),
+        )
     out_dir.mkdir(exist_ok=True, parents=True)
 
     print(f"Input file : {src_file}")
@@ -147,8 +162,8 @@ def main(
         csv_name = f"{prefix}{pct_label}.csv"
         log_name = f"{prefix}{pct_label}.json"
 
-        df_injected.to_csv(out_dir / csv_name, index=False)
-        with open(out_dir / log_name, "w") as f:
+        df_injected.to_csv(validate_path(str(out_dir / csv_name)), index=False)
+        with open(validate_path(str(out_dir / log_name)), "w") as f:
             json.dump(error_log, f, indent=2)
 
         print(f"  {pct:>2}%: {len(error_log):>4} cells outliered  → {csv_name}")

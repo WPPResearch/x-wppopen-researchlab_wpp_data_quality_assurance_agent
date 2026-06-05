@@ -246,23 +246,43 @@ async def run_campaign_table_audit(
     results_dir = os.path.join(eval_dir, "results", experiment_name)
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
     output_dir = os.path.join(results_dir, timestamp)
-    os.makedirs(output_dir, exist_ok=True)
+
+    from pathlib import Path
+
+    def validate_path(path_str: str) -> Path:
+        p = Path(path_str).resolve()
+        safe_bases = [
+            Path.cwd().resolve(),
+            Path.home().resolve(),
+            Path("/tmp").resolve(),
+        ]
+        if not any(p.is_relative_to(base) for base in safe_bases):
+            raise ValueError(f"Path traversal detected: {path_str}")
+        return p
+
+    validated_output_dir = validate_path(output_dir)
+    os.makedirs(validated_output_dir, exist_ok=True)
 
     # Save response text
-    response_file = os.path.join(output_dir, f"response_{experiment_name}.txt")
-    with open(response_file, "w", encoding="utf-8") as f:
+    response_file = os.path.join(
+        str(validated_output_dir),
+        f"response_{experiment_name}.txt",
+    )
+    validated_response_file = validate_path(response_file)
+    with open(validated_response_file, "w", encoding="utf-8") as f:
         f.write(response_text)
 
     # Save metadata
-    metadata_file = os.path.join(output_dir, "metadata.json")
+    metadata_file = os.path.join(str(validated_output_dir), "metadata.json")
+    validated_metadata_file = validate_path(metadata_file)
     import json
 
-    with open(metadata_file, "w", encoding="utf-8") as f:
+    with open(validated_metadata_file, "w", encoding="utf-8") as f:
         json.dump(result, f, indent=2)
 
-    print(f"\n✅ Results saved to: {output_dir}")
-    print(f"   - Response: {response_file}")
-    print(f"   - Metadata: {metadata_file}")
+    print(f"\n✅ Results saved to: {validated_output_dir}")
+    print(f"   - Response: {validated_response_file}")
+    print(f"   - Metadata: {validated_metadata_file}")
 
     return result
 

@@ -47,9 +47,9 @@ class TestReportAgent(unittest.IsolatedAsyncioTestCase):
         self.artifact_service = InMemoryArtifactService()
         self.session = await self.session_service.create_session(
             app_name="DataAgent",
-            user_id="test_user",
+            user_id=os.environ.get("TEST_USER_ID", "test_user"),
         )
-        self.user_id = "test_user"
+        self.user_id = os.environ.get("TEST_USER_ID", "test_user")
         self.session_id = self.session.id
 
     def _run_agent(self, agent, query):

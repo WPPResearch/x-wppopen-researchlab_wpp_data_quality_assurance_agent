@@ -70,6 +70,23 @@ def parse_columns_v1(file_path: Path):
     return columns
 
 
+def validate_path(path_str: str | None) -> Path | None:
+    """Resolve and validate the path to prevent directory traversal."""
+    if path_str is None:
+        return None
+    p = Path(path_str).resolve()
+
+    safe_bases = [
+        Path.cwd().resolve(),
+        Path.home().resolve(),
+        Path("/tmp").resolve(),
+    ]
+
+    if not any(p.is_relative_to(base) for base in safe_bases):
+        raise ValueError(f"Path traversal detected: {path_str}")
+    return p
+
+
 def main():
     """Main function to generate synthetic dataset from schema file."""
     parser = argparse.ArgumentParser(
@@ -93,7 +110,7 @@ def main():
 
     args = parser.parse_args()
 
-    schema_file = Path(args.schema_file)
+    schema_file = validate_path(args.schema_file)
     num_rows = args.num_rows
 
     # Set random seed if provided
@@ -105,7 +122,7 @@ def main():
 
     # Generate output filename in the same directory as the schema file
     output_file = schema_file.stem.replace("schema", "synthetic_dataset") + ".csv"
-    output_path = schema_file.parent / output_file
+    output_path = validate_path(str(schema_file.parent / output_file))
 
     # Parse schema and generate CSV
     columns = parse_columns_v1(schema_file)
@@ -116,7 +133,7 @@ def main():
     print(f"Generating {num_rows} rows to {output_path}")
 
     with open(output_path, mode="w", newline="") as file:
-        writer = csv.writer(file)
+        writer = csv.writer(file, quoting=csv.QUOTE_ALL)
         writer.writerow(list(columns.keys()))
 
         for _ in range(num_rows):

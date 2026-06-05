@@ -113,9 +113,9 @@ async def inspect_memories(query: str = "table errors"):
             print("  - Manually store memories via the ADK API")
         else:
             for i, memory in enumerate(memories, 1):
-                print(f"{'='*80}")
+                print(f"{'=' * 80}")
                 print(f"  MEMORY #{i}")
-                print(f"{'='*80}")
+                print(f"{'=' * 80}")
                 print()
 
                 # Display memory attributes

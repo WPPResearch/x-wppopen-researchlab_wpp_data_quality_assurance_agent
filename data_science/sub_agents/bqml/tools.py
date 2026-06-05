@@ -67,13 +67,23 @@ def rag_response(query: str) -> str:
         top_k=3,  # Optional
         filter=rag.Filter(vector_distance_threshold=0.5),  # Optional
     )
-    response = rag.retrieval_query(
-        rag_resources=[
-            rag.RagResource(
-                rag_corpus=corpus_name,
-            ),
-        ],
-        text=query,
-        rag_retrieval_config=rag_retrieval_config,
-    )
-    return str(response)
+    try:
+        response = rag.retrieval_query(
+            rag_resources=[
+                rag.RagResource(
+                    rag_corpus=corpus_name,
+                ),
+            ],
+            text=query,
+            rag_retrieval_config=rag_retrieval_config,
+        )
+        return str(response)
+    except Exception as e:
+        import logging
+
+        logging.getLogger(__name__).warning(
+            "Failed to retrieve context from RAG corpus %s: %s",
+            corpus_name,
+            e,
+        )
+        return f"Failed to retrieve context from RAG corpus. Please rely on your pre-trained knowledge. (Error: {e})"

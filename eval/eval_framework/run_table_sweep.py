@@ -40,10 +40,10 @@ async def main():
 
     for table_key in TABLES:
         table_info = TABLES[table_key]
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print(f"  Table: {table_info['short_name']}")
         print(f"  Description: {table_info['description']}")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
 
         result = await run_single_audit(
             table_key=table_key,

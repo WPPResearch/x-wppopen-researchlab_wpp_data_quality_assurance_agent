@@ -131,7 +131,7 @@ def main(
             json.dump(error_log, f, indent=2)
 
         print(
-            f"  {pct:>2}%: {len(error_log):>4} cells nulled  ({(len(error_log)/df_base.size)*100:.2f}% of targeted cells)  → {csv_name}",
+            f"  {pct:>2}%: {len(error_log):>4} cells nulled  ({(len(error_log) / df_base.size) * 100:.2f}% of targeted cells)  → {csv_name}",
         )
 
     print(f"\n✅  Done! Injected CSVs + error logs saved to: {out_dir}")

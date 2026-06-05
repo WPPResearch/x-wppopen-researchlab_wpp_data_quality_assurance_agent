@@ -161,7 +161,7 @@ async def save_memory(
         resource_name = memory_uri
     else:
         logger.warning(
-            "save_memory: unrecognised MEMORY_SERVICE_URI " f"format: {memory_uri}",
+            f"save_memory: unrecognised MEMORY_SERVICE_URI format: {memory_uri}",
         )
         return "Invalid memory configuration."
 
@@ -173,7 +173,7 @@ async def save_memory(
 
     if not str(session_id).isdigit():
         logger.debug(
-            "save_memory: skipped — session %r is not a " "Vertex AI session.",
+            "save_memory: skipped — session %r is not a Vertex AI session.",
             session_id,
         )
         return (

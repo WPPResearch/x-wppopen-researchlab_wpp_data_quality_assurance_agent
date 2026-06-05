@@ -40,14 +40,16 @@ ADK_BUILTIN_BQ_EXECUTE_SQL_TOOL = "execute_sql"
 def setup_before_agent_call(callback_context: CallbackContext):
     """Setup the agent."""
 
-    if "database_settings" in callback_context.state:
-        return
-
-    # setting up database settings in session.state
-    db_settings = {
-        "bigquery": get_bq_database_settings(),
-    }
-    callback_context.state["database_settings"] = db_settings
+    if "database_settings" not in callback_context.state:
+        db_settings = {
+            "bigquery": get_bq_database_settings(),
+        }
+        callback_context.state["database_settings"] = db_settings
+    elif "bigquery" not in callback_context.state["database_settings"]:
+        # If the state has flat/unwrapped settings, we wrap them or fetch BQ settings
+        callback_context.state["database_settings"]["bigquery"] = (
+            get_bq_database_settings()
+        )
 
     schema = callback_context.state["database_settings"]["bigquery"]["schema"]
 

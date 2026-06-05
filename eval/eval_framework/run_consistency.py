@@ -55,9 +55,9 @@ async def main():
     results = []
 
     for i in range(1, num_runs + 1):
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print(f"  Run {i} of {num_runs}")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
 
         result = await run_single_audit(
             table_key=TARGET_TABLE,
@@ -68,7 +68,7 @@ async def main():
         results.append(result)
 
         print(f"\n✓ Completed run {i}/{num_runs}")
-        print(f"{'='*60}\n")
+        print(f"{'=' * 60}\n")
 
     # Evaluate — the judge will compare all runs and note variance
     scorecard = evaluate_with_gemini_judge(

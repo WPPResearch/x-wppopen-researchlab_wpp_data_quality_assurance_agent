@@ -181,7 +181,7 @@ async def run_campaign_table_audit(
     query = build_campaign_audit_query(prompt_level, memory_mode)
 
     print(f"\nQuery: {query[:150]}...")
-    print(f"\n{'─'*60}")
+    print(f"\n{'─' * 60}")
 
     # Warmup
     print("Agent warming up...")

@@ -250,13 +250,13 @@ def generate_markdown_report(metrics, output_path):
     total_runs = len(overall_metrics)
 
     report.append(
-        f"- **Perfect Detection (F1=1.0):** {perfect_f1}/{total_runs} ({perfect_f1/total_runs*100:.1f}%)",
+        f"- **Perfect Detection (F1=1.0):** {perfect_f1}/{total_runs} ({perfect_f1 / total_runs * 100:.1f}%)",
     )
     report.append(
-        f"- **Complete Failure (F1=0.0):** {failed_f1}/{total_runs} ({failed_f1/total_runs*100:.1f}%)",
+        f"- **Complete Failure (F1=0.0):** {failed_f1}/{total_runs} ({failed_f1 / total_runs * 100:.1f}%)",
     )
     report.append(
-        f"- **Partial Success (0<F1<1):** {total_runs - perfect_f1 - failed_f1}/{total_runs} ({(total_runs - perfect_f1 - failed_f1)/total_runs*100:.1f}%)",
+        f"- **Partial Success (0<F1<1):** {total_runs - perfect_f1 - failed_f1}/{total_runs} ({(total_runs - perfect_f1 - failed_f1) / total_runs * 100:.1f}%)",
     )
     report.append("")
 

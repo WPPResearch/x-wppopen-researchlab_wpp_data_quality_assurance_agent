@@ -34,6 +34,10 @@ def setup_before_agent_call(callback_context: CallbackContext):
         callback_context.state["database_settings"] = {
             "bigquery": get_bq_database_settings(),
         }
+    elif "bigquery" not in callback_context.state["database_settings"]:
+        callback_context.state["database_settings"]["bigquery"] = (
+            get_bq_database_settings()
+        )
 
     schema = callback_context.state["database_settings"]["bigquery"]["schema"]
 

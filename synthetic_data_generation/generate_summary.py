@@ -68,7 +68,7 @@ for d in dirs:
         while i < len(tokens):
             token = tokens[i]
             if token == "log" and i + 1 < len(tokens):
-                key = f"log_{tokens[i+1]}"
+                key = f"log_{tokens[i + 1]}"
                 if key in RULE_MAP:
                     logical_rules.add(RULE_MAP[key])
                 i += 1

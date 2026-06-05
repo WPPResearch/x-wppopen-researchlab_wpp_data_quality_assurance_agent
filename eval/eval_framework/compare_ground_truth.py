@@ -377,7 +377,7 @@ def generate_csv_comparison(experiment_dir: str, ground_truth: dict) -> str:
             f"{gt['structural_count']},{predictions['structural_detected']},"
             f"{gt['logical_count']},{predictions['logical_detected']},"
             f"{gt['total_count']},{predictions['total_detected']},"
-            f"{accuracy:.1f}%,\"{detected_str}\",\"{missed_str}\"",
+            f'{accuracy:.1f}%,"{detected_str}","{missed_str}"',
         )
 
     return "\n".join(csv_lines)

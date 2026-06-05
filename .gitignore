@@ -18,7 +18,7 @@ notebooks/
 gcp-key.json
 data_science/sub_agents/report/
 data_science/.adk/
-docs/
+docs/internal/
 dev/output/
 snyk_scan/
 generate_mixed_final.sh
@@ -73,10 +73,10 @@ secrets.yaml
 .eggs/
 build/
 *.whl
+.pytest_cache/
 
 # Claude Code artifacts
-.claude/projects/
-.claude/settings.local.json
+.claude/
 
 # Temporary files
 *.tmp

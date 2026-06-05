@@ -111,9 +111,9 @@ async def main():
     results = []
 
     for level in PROMPT_LEVELS:
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print(f"  Running with prompt level: {PROMPT_LEVELS[level]['label']}")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
 
         _patch_prompt_level(level)
 
@@ -125,7 +125,7 @@ async def main():
         results.append(result)
 
         print(f"\n✓ Completed experiment with {PROMPT_LEVELS[level]['label']}")
-        print(f"{'='*60}\n")
+        print(f"{'=' * 60}\n")
 
     # Reset to complex
     _patch_prompt_level("complex")

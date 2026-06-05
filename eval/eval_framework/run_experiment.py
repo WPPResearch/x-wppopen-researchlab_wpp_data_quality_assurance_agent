@@ -137,7 +137,7 @@ def print_table_detail(table_key: str, index: int, total: int):
     n_logical = len(gt["logical_errors"])
     n_structural = len(gt["structural_errors"])
 
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f"  [{index}/{total}] Table: {table_info['short_name']}")
     print(f"  Description: {table_info['description']}")
     print(f"  Ground Truth: {n_logical} logical, {n_structural} structural errors")
@@ -150,7 +150,7 @@ def print_table_detail(table_key: str, index: int, total: int):
     if gt["structural_errors"]:
         print(f"    Structural: {', '.join(gt['structural_errors'])}")
 
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
 
 
 async def run_experiment(
@@ -176,10 +176,10 @@ async def run_experiment(
         results = []
 
         for mode in memory_modes:
-            print(f"\n{'='*60}")
+            print(f"\n{'=' * 60}")
             print(f"  MEMORY MODE: {MEMORY_MODES[mode]['label']}")
             print(f"  {MEMORY_MODES[mode]['description']}")
-            print(f"{'='*60}")
+            print(f"{'=' * 60}")
 
             for i, table_key in enumerate(tables, 1):
                 print_table_detail(table_key, i, len(tables))

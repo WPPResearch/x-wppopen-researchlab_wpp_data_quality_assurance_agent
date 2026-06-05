@@ -239,10 +239,10 @@ async def main():
         # Clear the output file at start of each run
         open(output_filename, "w", encoding="utf-8").close()
 
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print(f"  RUN: {label}")
         print(f"  PROMPT: {prompt}")
-        print(f"{'='*60}\n")
+        print(f"{'=' * 60}\n")
 
         # Create a fresh session for each run so they are independent
         session = await create_session()
@@ -256,9 +256,9 @@ async def main():
         output_files[label] = output_filename
 
     # ── Evaluate both outputs side-by-side ──────────────────────────────
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print("  EVALUATION: Comparing both runs")
-    print(f"{'='*60}\n")
+    print(f"{'=' * 60}\n")
 
     reports = {}
     for label, filepath in output_files.items():

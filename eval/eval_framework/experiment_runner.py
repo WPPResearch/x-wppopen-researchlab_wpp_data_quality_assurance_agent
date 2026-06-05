@@ -141,12 +141,12 @@ async def run_single_audit(
     query = build_audit_query(table_key, memory_mode, prompt_level)
     table_info = TABLES[table_key]
 
-    print(f"\n{'─'*60}")
+    print(f"\n{'─' * 60}")
     print(f"  Table:  {table_info['short_name']}")
     print(f"  Prompt: {PROMPT_LEVELS[prompt_level]['label']}")
     print(f"  Memory: {MEMORY_MODES[memory_mode]['label']}")
     print(f"  Query:  {query[:100]}...")
-    print(f"{'─'*60}\n")
+    print(f"{'─' * 60}\n")
 
     # Warmup
     print("Agent warming up...")
@@ -287,7 +287,7 @@ def evaluate_with_gemini_judge(
 {gt_block}
 
     **Auditor Agent's Report:**
-    {r['response_text']}
+    {r["response_text"]}
     """
 
     n_structural = max(

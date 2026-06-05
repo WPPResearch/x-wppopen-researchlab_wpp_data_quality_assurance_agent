@@ -61,10 +61,10 @@ async def main():
     results = []
 
     for mode_key in MEMORY_MODES:
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print(f"  Running with: {MEMORY_MODES[mode_key]['label']}")
         print(f"  {MEMORY_MODES[mode_key]['description']}")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
 
         result = await run_single_audit(
             table_key=TARGET_TABLE,
@@ -74,7 +74,7 @@ async def main():
         results.append(result)
 
         print(f"\n✓ Completed experiment with {MEMORY_MODES[mode_key]['label']}")
-        print(f"{'='*60}\n")
+        print(f"{'=' * 60}\n")
 
     # Evaluate with Gemini judge
     print("\n" + "=" * 60)

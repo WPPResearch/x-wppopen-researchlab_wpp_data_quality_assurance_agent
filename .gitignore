@@ -16,11 +16,11 @@ data_science/utils/data/
 synthetic_generation/
 notebooks/
 gcp-key.json
-data_science/sub_agents/report/json_reports/
-data_science/sub_agents/report/testing_scripts.py
-data_science/sub_agents/report/test_output.json
+data_science/sub_agents/report/
 data_science/.adk/
 docs/
+dev/output/
+snyk_scan/
 generate_mixed_final.sh
 dev/get_started_with_memory_bank_on_adk.ipynb
 dev/get_started_with_memory_bank_custom_topics.ipynb

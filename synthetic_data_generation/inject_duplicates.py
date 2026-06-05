@@ -86,7 +86,20 @@ def main(
     seed: int,
     output_dir: str | None,
 ) -> None:
-    src_file = Path(input_file)
+    def validate_path(path_str: str | None) -> Path | None:
+        if path_str is None:
+            return None
+        p = Path(path_str).resolve()
+        safe_bases = [
+            Path.cwd().resolve(),
+            Path.home().resolve(),
+            Path("/tmp").resolve(),
+        ]
+        if not any(p.is_relative_to(base) for base in safe_bases):
+            raise ValueError(f"Path traversal detected: {path_str}")
+        return p
+
+    src_file = validate_path(input_file)
     if not src_file.exists():
         raise FileNotFoundError(f"Input file not found: {src_file}")
 
@@ -95,9 +108,11 @@ def main(
 
     # Output directory
     if output_dir:
-        out_dir = Path(output_dir)
+        out_dir = validate_path(output_dir)
     else:
-        out_dir = src_file.parent / f"{file_stem}_duplicates_injected"
+        out_dir = validate_path(
+            str(src_file.parent / f"{file_stem}_duplicates_injected"),
+        )
     out_dir.mkdir(exist_ok=True, parents=True)
 
     print(f"Input file : {src_file}")
@@ -124,10 +139,10 @@ def main(
         log_name = f"{prefix}{pct_label}.json"
 
         # Save injected CSV
-        df_injected.to_csv(out_dir / csv_name, index=False)
+        df_injected.to_csv(validate_path(str(out_dir / csv_name)), index=False)
 
         # Save sidecar error log
-        with open(out_dir / log_name, "w") as f:
+        with open(validate_path(str(out_dir / log_name)), "w") as f:
             json.dump(error_log, f, indent=2)
 
         print(

@@ -208,7 +208,11 @@ best practices outlined above to generate the correct BigQuery SQL.
 
    """
 
-    schema = tool_context.state["database_settings"]["bigquery"]["schema"]
+    db_settings = tool_context.state["database_settings"]
+    if "bigquery" in db_settings:
+        schema = db_settings["bigquery"]["schema"]
+    else:
+        schema = db_settings.get("schema")
 
     prompt = prompt_template.format(
         MAX_NUM_ROWS=MAX_NUM_ROWS,

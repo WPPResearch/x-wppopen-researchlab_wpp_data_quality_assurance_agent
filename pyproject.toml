@@ -36,6 +36,7 @@ dependencies = [
     "nltk>=3.9.4",
     "asyncpg>=0.31.0",
     "starlette>=1.0.1",
+    "google-cloud-dataplex>=2.0.0",
 ]
 
 [dependency-groups]

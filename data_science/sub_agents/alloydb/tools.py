@@ -183,7 +183,11 @@ sample rows):
 
    """
 
-    schema = tool_context.state["database_settings"]["alloydb"]["schema"]
+    db_settings = tool_context.state["database_settings"]
+    if "alloydb" in db_settings:
+        schema = db_settings["alloydb"]["schema"]
+    else:
+        schema = db_settings.get("schema")
 
     prompt = prompt_template.format(
         #        MAX_NUM_ROWS=MAX_NUM_ROWS,

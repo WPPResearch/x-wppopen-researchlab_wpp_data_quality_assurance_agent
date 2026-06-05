@@ -68,11 +68,14 @@ class TestAgents(unittest.IsolatedAsyncioTestCase):
             ),
         )
 
-        last_event = events[-1]
-        final_response = "".join(
-            [part.text for part in last_event.content.parts if part.text],
-        )
-        return final_response
+        for event in reversed(events):
+            if event.content and event.content.parts:
+                final_response = "".join(
+                    [part.text for part in event.content.parts if part.text],
+                )
+                if final_response:
+                    return final_response
+        return None
 
     @pytest.mark.db_agent
     async def test_db_agent_can_handle_env_query(self):

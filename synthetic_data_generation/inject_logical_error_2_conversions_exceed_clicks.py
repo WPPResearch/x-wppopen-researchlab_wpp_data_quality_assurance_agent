@@ -23,10 +23,12 @@ Usage:
 
 import argparse
 import json
+import os
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
+from werkzeug.security import safe_join
 
 RULE_ID = 2
 RULE_NAME = "conversions_exceed_clicks"
@@ -75,7 +77,13 @@ def main(
     def validate_path(path_str: str | None) -> Path | None:
         if path_str is None:
             return None
-        p = Path(path_str).resolve()
+        # Sanitize via safe_join before pathlib.Path
+        parent_str, name = os.path.split(path_str)
+        parent_str = os.path.abspath(parent_str) if parent_str else os.getcwd()
+        safe_str = safe_join(parent_str, name)
+        if safe_str is None:
+            raise ValueError(f"Security Alert: Invalid path: {path_str}")
+        p = Path(safe_str).resolve()
         safe_bases = [
             Path.cwd().resolve(),
             Path.home().resolve(),
@@ -128,8 +136,14 @@ def main(
         csv_name = f"{prefix}{pct_label}.csv"
         log_name = f"{prefix}{pct_label}.json"
 
-        df_injected.to_csv(validate_path(str(out_dir / csv_name)), index=False)
-        with open(validate_path(str(out_dir / log_name)), "w") as f:
+        csv_path_str = safe_join(str(out_dir), csv_name)
+        if csv_path_str is None:
+            raise ValueError(f"Security Alert: Invalid CSV filename: {csv_name}")
+        df_injected.to_csv(Path(csv_path_str), index=False)
+        log_path_str = safe_join(str(out_dir), log_name)
+        if log_path_str is None:
+            raise ValueError(f"Security Alert: Invalid log filename: {log_name}")
+        with open(Path(log_path_str), "w") as f:
             json.dump(error_log, f, indent=2)
 
         print(f"  {pct:>2}%: {len(error_log):>4} errors injected  → {csv_name}")

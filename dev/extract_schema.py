@@ -1,13 +1,22 @@
-import pandas as pd
+import os
 import argparse
 from pathlib import Path
+
+import pandas as pd
+from werkzeug.security import safe_join
 
 
 def validate_path(path_str: str | None) -> Path | None:
     """Resolve and validate the path to prevent directory traversal."""
     if path_str is None:
         return None
-    p = Path(path_str).resolve()
+    # Sanitize via safe_join before pathlib.Path
+    parent_str, name = os.path.split(path_str)
+    parent_str = os.path.abspath(parent_str) if parent_str else os.getcwd()
+    safe_str = safe_join(parent_str, name)
+    if safe_str is None:
+        raise ValueError(f"Security Alert: Invalid path: {path_str}")
+    p = Path(safe_str).resolve()
 
     safe_bases = [
         Path.cwd().resolve(),
@@ -34,7 +43,10 @@ def main():
 
     df = pd.read_csv(input_path)
     base = input_path.stem
-    out_path = validate_path(str(input_path.parent / f"{base}_schema.txt"))
+    out_path_str = safe_join(str(input_path.parent), f"{base}_schema.txt")
+    if out_path_str is None:
+        raise ValueError(f"Security Alert: Invalid schema filename for base: {base}")
+    out_path = Path(out_path_str)
 
     with open(out_path, "w") as f:
         for col in df.columns:

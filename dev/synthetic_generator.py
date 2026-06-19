@@ -1,8 +1,11 @@
 import csv
+import os
 import random
 import re
 import argparse
 from pathlib import Path
+
+from werkzeug.security import safe_join
 
 
 def _parse_value_block(block: str):
@@ -74,7 +77,13 @@ def validate_path(path_str: str | None) -> Path | None:
     """Resolve and validate the path to prevent directory traversal."""
     if path_str is None:
         return None
-    p = Path(path_str).resolve()
+    # Sanitize via safe_join before pathlib.Path
+    parent_str, name = os.path.split(path_str)
+    parent_str = os.path.abspath(parent_str) if parent_str else os.getcwd()
+    safe_str = safe_join(parent_str, name)
+    if safe_str is None:
+        raise ValueError(f"Security Alert: Invalid path: {path_str}")
+    p = Path(safe_str).resolve()
 
     safe_bases = [
         Path.cwd().resolve(),
@@ -122,7 +131,10 @@ def main():
 
     # Generate output filename in the same directory as the schema file
     output_file = schema_file.stem.replace("schema", "synthetic_dataset") + ".csv"
-    output_path = validate_path(str(schema_file.parent / output_file))
+    output_path_str = safe_join(str(schema_file.parent), output_file)
+    if output_path_str is None:
+        raise ValueError(f"Security Alert: Invalid output filename: {output_file}")
+    output_path = Path(output_path_str)
 
     # Parse schema and generate CSV
     columns = parse_columns_v1(schema_file)

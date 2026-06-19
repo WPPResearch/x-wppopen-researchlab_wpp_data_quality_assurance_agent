@@ -14,6 +14,9 @@ import os
 import json
 import logging
 import warnings
+from pathlib import Path
+
+from werkzeug.security import safe_join
 from datetime import datetime, timezone
 
 # Completely disable OpenTelemetry globally before anything else loads
@@ -351,9 +354,16 @@ def save_experiment_results(
         Path to the experiment output directory.
     """
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    experiment_dir = os.path.join(RESULTS_DIR, experiment_name, timestamp)
-
-    from pathlib import Path
+    # safe_join prevents path traversal via experiment_name or timestamp
+    _exp_str = safe_join(RESULTS_DIR, experiment_name)
+    if _exp_str is None:
+        raise ValueError(
+            f"Invalid experiment name for path construction: {experiment_name!r}",
+        )
+    experiment_dir_str = safe_join(_exp_str, timestamp)
+    if experiment_dir_str is None:
+        raise ValueError(f"Invalid timestamp for path construction: {timestamp!r}")
+    experiment_dir = experiment_dir_str
 
     def validate_path(path_str: str) -> Path:
         p = Path(path_str).resolve()
@@ -372,11 +382,10 @@ def save_experiment_results(
     # Save each audit response
     for i, r in enumerate(results):
         label = f"{r['table_key']}_{r['prompt_level']}_{r['memory_mode']}"
-        response_file = os.path.join(
-            str(validated_experiment_dir),
-            f"response_{label}.txt",
-        )
-        validated_response_file = validate_path(response_file)
+        _resp_str = safe_join(str(validated_experiment_dir), f"response_{label}.txt")
+        if _resp_str is None:
+            raise ValueError(f"Invalid response filename for label: {label!r}")
+        validated_response_file = validate_path(_resp_str)
         with open(validated_response_file, "w", encoding="utf-8") as f:
             f.write(r["response_text"])
 
@@ -386,15 +395,19 @@ def save_experiment_results(
         "timestamp": timestamp,
         "runs": [{k: v for k, v in r.items() if k != "response_text"} for r in results],
     }
-    metadata_file = os.path.join(str(validated_experiment_dir), "metadata.json")
-    validated_metadata_file = validate_path(metadata_file)
+    _meta_str = safe_join(str(validated_experiment_dir), "metadata.json")
+    if _meta_str is None:
+        raise ValueError("Invalid experiment dir for metadata path construction")
+    validated_metadata_file = validate_path(_meta_str)
     with open(validated_metadata_file, "w", encoding="utf-8") as f:
         json.dump(metadata, f, indent=2)
 
     # Save scorecard
     if scorecard:
-        scorecard_file = os.path.join(str(validated_experiment_dir), "scorecard.txt")
-        validated_scorecard_file = validate_path(scorecard_file)
+        _score_str = safe_join(str(validated_experiment_dir), "scorecard.txt")
+        if _score_str is None:
+            raise ValueError("Invalid experiment dir for scorecard path construction")
+        validated_scorecard_file = validate_path(_score_str)
         with open(validated_scorecard_file, "w", encoding="utf-8") as f:
             f.write(scorecard)
             f.write("\n")

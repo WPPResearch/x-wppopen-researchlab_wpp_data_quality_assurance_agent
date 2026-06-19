@@ -1,4 +1,4 @@
-FROM python:3.12-slim
+FROM python:3.15-rc-alpine
 
 # Prevents Python from buffering stdout and stderr
 ENV PYTHONUNBUFFERED=1
@@ -6,9 +6,7 @@ ENV PYTHONUNBUFFERED=1
 ENV UV_LINK_MODE=copy
 
 # Install system deps needed for building native extensions
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache build-base
 
 WORKDIR /app
 
@@ -25,7 +23,7 @@ RUN uv sync --frozen
 COPY . .
 
 # Create a non-root user to avoid running as root
-RUN useradd -m appuser && chown -R appuser:appuser /app
+RUN adduser -D appuser && chown -R appuser:appuser /app
 USER appuser
 
 EXPOSE 8000

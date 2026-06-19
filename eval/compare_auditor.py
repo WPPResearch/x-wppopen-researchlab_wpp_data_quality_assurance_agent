@@ -16,6 +16,8 @@ import asyncio
 import logging
 import warnings
 
+from werkzeug.security import safe_join
+
 # Completely disable OpenTelemetry globally before anything else loads
 os.environ["OTEL_SDK_DISABLED"] = "true"
 
@@ -235,7 +237,10 @@ async def main():
     output_files = {}
 
     for label, prompt in runs:
-        output_filename = os.path.join(script_dir, f"auditor_response_{label}.txt")
+        _out_str = safe_join(script_dir, f"auditor_response_{label}.txt")
+        if _out_str is None:
+            raise ValueError(f"Invalid label for output filename: {label!r}")
+        output_filename = _out_str
         # Clear the output file at start of each run
         open(output_filename, "w", encoding="utf-8").close()
 
@@ -276,7 +281,10 @@ async def main():
     evaluation_result = evaluate_with_gemini_judge(reports)
 
     if evaluation_result:
-        scorecard_path = os.path.join(script_dir, "comparison_scorecard.txt")
+        _score_str = safe_join(script_dir, "comparison_scorecard.txt")
+        if _score_str is None:
+            raise ValueError("Invalid script_dir for scorecard path construction")
+        scorecard_path = _score_str
         print(f"\n💾 Saving comparison scorecard to {scorecard_path}...")
         with open(scorecard_path, "w", encoding="utf-8") as f:
             f.write(evaluation_result)

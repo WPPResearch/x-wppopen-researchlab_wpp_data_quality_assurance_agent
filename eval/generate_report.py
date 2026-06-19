@@ -12,6 +12,8 @@ import os
 import json
 from datetime import datetime
 
+from werkzeug.security import safe_join
+
 
 EVAL_DIR = os.path.dirname(os.path.abspath(__file__))
 RESULTS_DIR = os.path.join(EVAL_DIR, "results")
@@ -27,13 +29,19 @@ EXPERIMENT_DESCRIPTIONS = {
 
 def find_latest_run(experiment_name: str) -> str | None:
     """Find the most recent results directory for an experiment."""
-    exp_dir = os.path.join(RESULTS_DIR, experiment_name)
+    exp_dir_str = safe_join(RESULTS_DIR, experiment_name)
+    if exp_dir_str is None:
+        return None
+    exp_dir = exp_dir_str
     if not os.path.isdir(exp_dir):
         return None
 
     runs = sorted(os.listdir(exp_dir), reverse=True)
     for run in runs:
-        run_dir = os.path.join(exp_dir, run)
+        run_dir_str = safe_join(exp_dir, run)
+        if run_dir_str is None:
+            continue
+        run_dir = run_dir_str
         if os.path.isdir(run_dir) and os.path.exists(
             os.path.join(run_dir, "scorecard.txt"),
         ):

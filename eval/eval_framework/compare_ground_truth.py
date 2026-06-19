@@ -10,6 +10,8 @@ import csv
 import json
 import re
 
+from werkzeug.security import safe_join
+
 
 def resolve_table_name_to_key(table_name: str) -> str | None:
     """Map a full table name to a table key."""
@@ -401,7 +403,11 @@ def main():
     # Find all experiment directories
     experiments = {}
     for exp_type in os.listdir(results_dir):
-        exp_path = os.path.join(results_dir, exp_type)
+        exp_path_str = safe_join(results_dir, exp_type)
+        if exp_path_str is None:
+            print(f"  ⚠️  Skipping unsafe experiment path: {exp_type!r}")
+            continue
+        exp_path = exp_path_str
         if not os.path.isdir(exp_path):
             continue
 
@@ -415,7 +421,11 @@ def main():
             reverse=True,
         )
         if runs:
-            latest_run = os.path.join(exp_path, runs[0])
+            _run_str = safe_join(exp_path, runs[0])
+            if _run_str is None:
+                print(f"  ⚠️  Skipping unsafe run path: {runs[0]!r}")
+                continue
+            latest_run = _run_str
             experiments[exp_type] = latest_run
 
     print(f"Found {len(experiments)} experiments with results:\n")
@@ -431,7 +441,11 @@ def main():
 
         # Text format
         comparison = generate_comparison_report(exp_dir, ground_truth)
-        output_path = os.path.join(exp_dir, "ground_truth_comparison.txt")
+        output_path_str = safe_join(exp_dir, "ground_truth_comparison.txt")
+        if output_path_str is None:
+            print(f"\u26a0\ufe0f  Skipping unsafe output path for: {exp_dir!r}")
+            continue
+        output_path = output_path_str
         with open(output_path, "w", encoding="utf-8") as f:
             f.write(comparison)
         print(f"✅ Saved text comparison to: {output_path}")
@@ -439,7 +453,11 @@ def main():
         # CSV format
         csv_comparison = generate_csv_comparison(exp_dir, ground_truth)
         if csv_comparison:
-            csv_output_path = os.path.join(exp_dir, "ground_truth_comparison.csv")
+            csv_output_path_str = safe_join(exp_dir, "ground_truth_comparison.csv")
+            if csv_output_path_str is None:
+                print(f"\u26a0\ufe0f  Skipping unsafe CSV output path for: {exp_dir!r}")
+                continue
+            csv_output_path = csv_output_path_str
             with open(csv_output_path, "w", encoding="utf-8") as f:
                 f.write(csv_comparison)
             print(f"✅ Saved CSV comparison to: {csv_output_path}")

@@ -15,6 +15,9 @@ import sys
 import asyncio
 import argparse
 from datetime import datetime, timezone
+from pathlib import Path
+
+from werkzeug.security import safe_join
 
 # Ensure project root is on sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
@@ -243,11 +246,20 @@ async def run_campaign_table_audit(
 
     # Create results directory
     eval_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    results_dir = os.path.join(eval_dir, "results", experiment_name)
+    # safe_join prevents path traversal via experiment_name and timestamp
+    _results_str = safe_join(eval_dir, "results")
+    if _results_str is None:
+        raise ValueError("Invalid eval_dir for results path construction")
+    _exp_str = safe_join(_results_str, experiment_name)
+    if _exp_str is None:
+        raise ValueError(
+            f"Invalid experiment name for path construction: {experiment_name!r}",
+        )
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
-    output_dir = os.path.join(results_dir, timestamp)
-
-    from pathlib import Path
+    _out_str = safe_join(_exp_str, timestamp)
+    if _out_str is None:
+        raise ValueError(f"Invalid timestamp for path construction: {timestamp!r}")
+    output_dir = _out_str
 
     def validate_path(path_str: str) -> Path:
         p = Path(path_str).resolve()
@@ -264,17 +276,20 @@ async def run_campaign_table_audit(
     os.makedirs(validated_output_dir, exist_ok=True)
 
     # Save response text
-    response_file = os.path.join(
-        str(validated_output_dir),
-        f"response_{experiment_name}.txt",
-    )
-    validated_response_file = validate_path(response_file)
+    _resp_str = safe_join(str(validated_output_dir), f"response_{experiment_name}.txt")
+    if _resp_str is None:
+        raise ValueError(
+            f"Invalid experiment name for response filename: {experiment_name!r}",
+        )
+    validated_response_file = validate_path(_resp_str)
     with open(validated_response_file, "w", encoding="utf-8") as f:
         f.write(response_text)
 
     # Save metadata
-    metadata_file = os.path.join(str(validated_output_dir), "metadata.json")
-    validated_metadata_file = validate_path(metadata_file)
+    _meta_str = safe_join(str(validated_output_dir), "metadata.json")
+    if _meta_str is None:
+        raise ValueError("Invalid output dir for metadata path construction")
+    validated_metadata_file = validate_path(_meta_str)
     import json
 
     with open(validated_metadata_file, "w", encoding="utf-8") as f:

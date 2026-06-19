@@ -19,6 +19,8 @@ import os
 import re
 import sys
 
+from werkzeug.security import safe_join
+
 # Add eval directory to path to import experiment_configs
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from experiment_configs import TABLES
@@ -340,7 +342,12 @@ def main():
     all_rows = []
 
     for exp_type in sorted(os.listdir(results_dir)):
-        exp_path = os.path.join(results_dir, exp_type)
+        # safe_join prevents path traversal if a directory name contains '..'
+        exp_path_str = safe_join(results_dir, exp_type)
+        if exp_path_str is None:
+            print(f"  ⚠️  Skipping potentially unsafe experiment path: {exp_type!r}")
+            continue
+        exp_path = exp_path_str
         if not os.path.isdir(exp_path):
             continue
 
@@ -357,8 +364,12 @@ def main():
         if not runs:
             continue
 
-        # Use the most recent run
-        latest_run_dir = os.path.join(exp_path, runs[0])
+        # safe_join prevents path traversal via the run directory name
+        _run_str = safe_join(exp_path, runs[0])
+        if _run_str is None:
+            print(f"  ⚠️  Skipping unsafe run path: {runs[0]!r}")
+            continue
+        latest_run_dir = _run_str
         print(f"📂 {exp_type} (run: {runs[0]})")
 
         rows = process_experiment(exp_type, latest_run_dir)

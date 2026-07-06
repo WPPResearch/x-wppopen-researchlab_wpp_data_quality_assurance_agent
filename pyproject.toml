@@ -79,6 +79,9 @@ filterwarnings = [
     "ignore::UserWarning",
 ]
 
+[tool.uv.sources]
+nltk = { git = "https://github.com/nltk/nltk.git", branch = "develop" }
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
